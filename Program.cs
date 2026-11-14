@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Text;
 
 namespace SportsSection
@@ -111,12 +112,16 @@ namespace SportsSection
         static void RunTabulation()
         {
             Console.WriteLine("=== Розрахунок вартості абонемента залежно від годин на тиждень ===");
-            Console.WriteLine("(Базова ставка: 400 грн/год на тиждень, знижка 3% за кожну годину інтенсивності)\n");
+            double from = ReadDouble("Введіть початкову кількість годин (0.5 - 20): ", 0.5, 20.0);
+            double to = ReadDouble($"Введіть кінцеву кількість годин ({from:F1} - 40): ", from, 40.0);
+            double step = ReadDouble("Введіть крок зміни годин (0.1 - 5): ", 0.1, 5.0);
 
-            double from = 1.0;
-            double to = 5.0;
-            double step = 0.5;
+            PrintTabulationTable(from, to, step);
+        }
 
+        static void PrintTabulationTable(double from, double to, double step)
+        {
+            Console.WriteLine("\n(Базова ставка: 400 грн/год на тиждень, знижка 3% за кожну годину інтенсивності)");
             Console.WriteLine($"{"Години/тиж",12} | {"Вартість, грн",15}");
             Console.WriteLine(new string('-', 30));
 
@@ -130,20 +135,14 @@ namespace SportsSection
         static void RunAttendanceTable()
         {
             Console.WriteLine("=== Звіт: кількість проведених тренувань по секціях і місяцях ===");
-            Console.Write("Введіть кількість секцій (рядків, від 1 до 15): ");
-            if (!int.TryParse(Console.ReadLine(), out int rows) || rows <= 0 || rows > 15)
-            {
-                Console.WriteLine("Помилка: кількість рядків має бути цілим числом від 1 до 15.");
-                return;
-            }
+            int rows = ReadInt("Введіть кількість секцій (рядків, від 1 до 15): ", 1, 15);
+            int cols = ReadInt("Введіть кількість місяців (стовпців, від 1 до 12): ", 1, 12);
 
-            Console.Write("Введіть кількість місяців (стовпців, від 1 до 12): ");
-            if (!int.TryParse(Console.ReadLine(), out int cols) || cols <= 0 || cols > 12)
-            {
-                Console.WriteLine("Помилка: кількість стовпців має бути цілим числом від 1 до 12.");
-                return;
-            }
+            PrintAttendanceTable(rows, cols);
+        }
 
+        static void PrintAttendanceTable(int rows, int cols)
+        {
             Console.WriteLine();
             int[] colTotals = new int[cols];
             int grandTotal = 0;
@@ -182,6 +181,39 @@ namespace SportsSection
                 Console.Write($"{colTotals[col - 1],9}");
             }
             Console.WriteLine($"{grandTotal,10}");
+        }
+
+        static int ReadInt(string prompt, int min, int max)
+        {
+            while (true)
+            {
+                Console.Write(prompt);
+                string input = Console.ReadLine();
+
+                if (int.TryParse(input, out int result) && result >= min && result <= max)
+                {
+                    return result;
+                }
+
+                Console.WriteLine($"Помилка: введіть ціле число від {min} до {max}.");
+            }
+        }
+
+        static double ReadDouble(string prompt, double min, double max)
+        {
+            while (true)
+            {
+                Console.Write(prompt);
+                string input = Console.ReadLine()?.Replace(',', '.');
+
+                if (double.TryParse(input, NumberStyles.Any, CultureInfo.InvariantCulture, out double result)
+                    && result >= min && result <= max)
+                {
+                    return result;
+                }
+
+                Console.WriteLine($"Помилка: введіть дійсне число від {min} до {max}.");
+            }
         }
     }
 }
