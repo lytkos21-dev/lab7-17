@@ -48,6 +48,11 @@ namespace SportsSection
                         Pause();
                         break;
 
+                    case "14":
+                        RunAgeCalculation();
+                        Pause();
+                        break;
+
                     case "0":
                         running = false;
                         Console.WriteLine("Завершення роботи. До побачення!");
@@ -78,6 +83,7 @@ namespace SportsSection
             Console.WriteLine("11 — довідка про програму");
             Console.WriteLine("12 — табулювання вартості занять");
             Console.WriteLine("13 — таблиця відвідуваності секцій");
+            Console.WriteLine("14 — розрахунок віку вихованця");
             Console.WriteLine("0  — вихід");
             Console.Write("Ваш вибір: ");
         }
@@ -127,9 +133,14 @@ namespace SportsSection
 
             for (double hours = from; hours <= to + 1e-9; hours += step)
             {
-                double cost = hours * 400.0 * (1.0 - 0.03 * hours);
+                double cost = CalculateSubscriptionCost(hours);
                 Console.WriteLine($"{hours,12:F2} | {cost,15:F2}");
             }
+        }
+
+        static double CalculateSubscriptionCost(double hoursPerWeek)
+        {
+            return hoursPerWeek * 400.0 * (1.0 - 0.03 * hoursPerWeek);
         }
 
         static void RunAttendanceTable()
@@ -181,6 +192,21 @@ namespace SportsSection
                 Console.Write($"{colTotals[col - 1],9}");
             }
             Console.WriteLine($"{grandTotal,10}");
+        }
+
+        static void RunAgeCalculation()
+        {
+            Console.WriteLine("=== Розрахунок віку вихованця ===");
+            int currentYear = DateTime.Now.Year;
+            int birthYear = ReadInt($"Введіть рік народження (1950 - {currentYear}): ", 1950, currentYear);
+
+            int age = CalculateTraineeAge(birthYear, currentYear);
+            Console.WriteLine($"Вік вихованця: {age} р.");
+        }
+
+        static int CalculateTraineeAge(int birthYear, int currentYear)
+        {
+            return currentYear - birthYear;
         }
 
         static int ReadInt(string prompt, int min, int max)
