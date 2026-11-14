@@ -81,7 +81,59 @@ namespace SportsSection
                         break;
 
                     case "13":
-                        Console.WriteLine("Поки не зроблено.");
+                        Console.WriteLine("=== Звіт: кількість проведених тренувань по секціях і місяцях ===");
+                        Console.Write("Введіть кількість секцій (рядків, від 1 до 15): ");
+                        if (!int.TryParse(Console.ReadLine(), out int rows) || rows <= 0 || rows > 15)
+                        {
+                            Console.WriteLine("Помилка: кількість рядків має бути цілим числом від 1 до 15.");
+                            break;
+                        }
+
+                        Console.Write("Введіть кількість місяців (стовпців, від 1 до 12): ");
+                        if (!int.TryParse(Console.ReadLine(), out int cols) || cols <= 0 || cols > 12)
+                        {
+                            Console.WriteLine("Помилка: кількість стовпців має бути цілим числом від 1 до 12.");
+                            break;
+                        }
+
+                        Console.WriteLine();
+                        int[] colTotals = new int[cols];
+                        int grandTotal = 0;
+
+                        Console.Write($"{"Секція \\ Місяць",-16}");
+                        for (int col = 1; col <= cols; col++)
+                        {
+                            Console.Write($"{$"Міс. {col}",9}");
+                        }
+                        Console.WriteLine($"{"Разом",10}");
+
+                        int lineWidth = 16 + cols * 9 + 10;
+                        Console.WriteLine(new string('-', lineWidth));
+
+                        for (int row = 1; row <= rows; row++)
+                        {
+                            Console.Write($"{"Секція #" + row,-16}");
+                            int rowSum = 0;
+
+                            for (int col = 1; col <= cols; col++)
+                            {
+                                int trainings = 8 + (row * 2 + col) % 7;
+                                rowSum += trainings;
+                                colTotals[col - 1] += trainings;
+                                Console.Write($"{trainings,9}");
+                            }
+
+                            Console.WriteLine($"{rowSum,10}");
+                        }
+
+                        Console.WriteLine(new string('-', lineWidth));
+                        Console.Write($"{"Разом",-16}");
+                        for (int col = 1; col <= cols; col++)
+                        {
+                            grandTotal += colTotals[col - 1];
+                            Console.Write($"{colTotals[col - 1],9}");
+                        }
+                        Console.WriteLine($"{grandTotal,10}");
                         break;
 
                     case "0":
