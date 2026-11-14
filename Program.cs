@@ -49,11 +49,35 @@ namespace SportsSection
                         break;
 
                     case "11":
-                        Console.WriteLine("Поки не зроблено.");
+                        Console.WriteLine("=== Довідка про застосунок ===");
+                        Console.WriteLine("Тема №12: Спортивна секція");
+                        Console.WriteLine("Сутності: Користувач, Вихованець (головна), Вид спорту (довідник)");
+                        Console.WriteLine("\nПоля сутності «Вихованець»:");
+                        Console.WriteLine("  1. Номер (int)");
+                        Console.WriteLine("  2. Прізвище та ім'я (string)");
+                        Console.WriteLine("  3. Рік народження (int)");
+                        Console.WriteLine("  4. Код виду спорту з довідника (int)");
+                        Console.WriteLine("  5. Розряд (string)");
+                        Console.WriteLine("  6. Дата вступу (DateTime)");
+                        Console.WriteLine("  7. Кількість тренувань на тиждень (int)");
                         break;
 
                     case "12":
-                        Console.WriteLine("Поки не зроблено.");
+                        Console.WriteLine("=== Розрахунок вартості абонемента залежно від годин на тиждень ===");
+                        Console.WriteLine("(Базова ставка: 400 грн/год на тиждень, знижка 3% за кожну годину інтенсивності)\n");
+
+                        double from = 1.0;
+                        double to = 5.0;
+                        double step = 0.5;
+
+                        Console.WriteLine($"{"Години/тиж",12} | {"Вартість, грн",15}");
+                        Console.WriteLine(new string('-', 30));
+
+                        for (double hours = from; hours <= to + 1e-9; hours += step)
+                        {
+                            double cost = hours * 400.0 * (1.0 - 0.03 * hours);
+                            Console.WriteLine($"{hours,12:F2} | {cost,15:F2}");
+                        }
                         break;
 
                     case "13":
