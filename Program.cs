@@ -71,6 +71,39 @@ namespace SportsSection
                         Pause();
                         break;
 
+                    case "17":
+                        Console.WriteLine("=== Статистика тренувань ===");
+                        if (trainingCount == 0)
+                        {
+                            Console.WriteLine("Масив порожній. Спочатку додайте хоча б одне значення.");
+                        }
+                        else
+                        {
+                            FindMax(trainingHours, trainingCount, out double maxVal, out int maxIdx);
+                            CalculateStatistics(trainingHours, trainingCount, out double sum, out double avg);
+
+                            Console.WriteLine($"Кількість записів:    {trainingCount}");
+                            Console.WriteLine($"Загальна тривалість:  {sum:F2} год");
+                            Console.WriteLine($"Середня тривалість:   {avg:F2} год");
+                            Console.WriteLine($"Найдовше тренування:  {maxVal:F2} год (запис №{maxIdx + 1})");
+                        }
+                        Pause();
+                        break;
+
+                    case "18":
+                        Console.WriteLine("=== Дослід: значимий тип (int) та посилальний тип (масив) ===");
+                        int sessions = 5;
+                        Console.WriteLine($"1. Значимий тип (int): до виклику методу sessions = {sessions}");
+                        TryModifyInt(sessions);
+                        Console.WriteLine($"   Після виклику TryModifyInt(sessions): sessions = {sessions} (не змінилося, передалась копія)");
+
+                        double[] sample = { 1.5, 2.0, 2.5 };
+                        Console.WriteLine($"\n2. Посилальний тип (double[]): до виклику методу sample[0] = {sample[0]:F1}");
+                        ModifyArrayElement(sample);
+                        Console.WriteLine($"   Після виклику ModifyArrayElement(sample): sample[0] = {sample[0]:F1} (змінилося, передалась адреса)");
+                        Pause();
+                        break;
+
                     case "0":
                         running = false;
                         Console.WriteLine("Завершення роботи. До побачення!");
@@ -103,8 +136,10 @@ namespace SportsSection
             Console.WriteLine("13 — таблиця відвідуваності секцій");
             Console.WriteLine("14 — розрахунок віку вихованця");
             Console.WriteLine("-----------------------------------------");
-            Console.WriteLine("15 — додати тривалість тренування (Лаб 9)");
-            Console.WriteLine("16 — показати список тренувань (Лаб 9)");
+            Console.WriteLine("15 — додати тривалість тренування ");
+            Console.WriteLine("16 — показати список тренувань ");
+            Console.WriteLine("17 — показати статистику та максимум ");
+            Console.WriteLine("18 — дослід: значимий та посилальний типи ");
             Console.WriteLine("0  — вихід");
             Console.Write("Ваш вибір: ");
         }
@@ -258,6 +293,52 @@ namespace SportsSection
             for (int i = 0; i < count; i++)
             {
                 Console.WriteLine($"{i + 1,4} | {values[i],16:F2}");
+            }
+        }
+
+        static void FindMax(double[] values, int count, out double maxValue, out int maxIndex)
+        {
+            if (count <= 0)
+            {
+                maxValue = 0;
+                maxIndex = -1;
+                return;
+            }
+
+            maxValue = values[0];
+            maxIndex = 0;
+
+            for (int i = 1; i < count; i++)
+            {
+                if (values[i] > maxValue)
+                {
+                    maxValue = values[i];
+                    maxIndex = i;
+                }
+            }
+        }
+
+        static void CalculateStatistics(double[] values, int count, out double sum, out double average)
+        {
+            sum = 0;
+            for (int i = 0; i < count; i++)
+            {
+                sum += values[i];
+            }
+
+            average = count > 0 ? sum / count : 0;
+        }
+
+        static void TryModifyInt(int value)
+        {
+            value += 100;
+        }
+
+        static void ModifyArrayElement(double[] values)
+        {
+            if (values.Length > 0)
+            {
+                values[0] += 10.0;
             }
         }
 
