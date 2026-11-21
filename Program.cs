@@ -11,6 +11,10 @@ namespace SportsSection
             Console.OutputEncoding = Encoding.UTF8;
             bool running = true;
 
+            const int Capacity = 100;
+            double[] trainingHours = new double[Capacity];
+            int trainingCount = 0;
+
             while (running)
             {
                 ShowMenu();
@@ -53,6 +57,20 @@ namespace SportsSection
                         Pause();
                         break;
 
+                    case "15":
+                        Console.WriteLine("=== Додавання тривалості тренування ===");
+                        double hours = ReadDouble("Введіть тривалість тренування (0.5 - 12 год): ", 0.5, 12.0);
+                        AddValue(trainingHours, ref trainingCount, hours, Capacity);
+                        Console.WriteLine($"Поточна кількість записів у Main: {trainingCount}");
+                        Pause();
+                        break;
+
+                    case "16":
+                        Console.WriteLine("=== Список зафіксованих тренувань ===");
+                        PrintValues(trainingHours, trainingCount);
+                        Pause();
+                        break;
+
                     case "0":
                         running = false;
                         Console.WriteLine("Завершення роботи. До побачення!");
@@ -84,6 +102,9 @@ namespace SportsSection
             Console.WriteLine("12 — табулювання вартості занять");
             Console.WriteLine("13 — таблиця відвідуваності секцій");
             Console.WriteLine("14 — розрахунок віку вихованця");
+            Console.WriteLine("-----------------------------------------");
+            Console.WriteLine("15 — додати тривалість тренування (Лаб 9)");
+            Console.WriteLine("16 — показати список тренувань (Лаб 9)");
             Console.WriteLine("0  — вихід");
             Console.Write("Ваш вибір: ");
         }
@@ -207,6 +228,37 @@ namespace SportsSection
         static int CalculateTraineeAge(int birthYear, int currentYear)
         {
             return currentYear - birthYear;
+        }
+
+
+        static void AddValue(double[] values, ref int count, double newValue, int capacity)
+        {
+            if (count >= capacity)
+            {
+                Console.WriteLine("Помилка: масив заповнений, місця більше немає.");
+                return;
+            }
+
+            values[count] = newValue;
+            count++;
+            Console.WriteLine("Значення успішно додано.");
+        }
+
+        static void PrintValues(double[] values, int count)
+        {
+            if (count == 0)
+            {
+                Console.WriteLine("Масив порожній. Немає даних для відображення.");
+                return;
+            }
+
+            Console.WriteLine($"{"№",4} | {"Тривалість, год",16}");
+            Console.WriteLine(new string('-', 23));
+
+            for (int i = 0; i < count; i++)
+            {
+                Console.WriteLine($"{i + 1,4} | {values[i],16:F2}");
+            }
         }
 
         static int ReadInt(string prompt, int min, int max)
