@@ -12,6 +12,16 @@ namespace SportsSection
             bool running = true;
 
             const int Capacity = 100;
+            int[] ids = new int[Capacity];
+            string[] fullNames = new string[Capacity];
+            int[] birthYears = new int[Capacity];
+            int[] sportIds = new int[Capacity];
+            string[] ranks = new string[Capacity];
+            DateTime[] enrollmentDates = new DateTime[Capacity];
+            int[] trainingsPerWeek = new int[Capacity];
+            int traineesCount = 0;
+            int nextTraineeId = 1;
+
             double[] trainingHours = new double[Capacity];
             int trainingCount = 0;
 
@@ -24,7 +34,17 @@ namespace SportsSection
                 switch (choice)
                 {
                     case "1":
+                        ShowNotImplemented();
+                        Pause();
+                        break;
+
                     case "2":
+                        AddTrainee(
+                            ids, fullNames, birthYears, sportIds, ranks, enrollmentDates, trainingsPerWeek,
+                            ref traineesCount, ref nextTraineeId, Capacity);
+                        Pause();
+                        break;
+
                     case "3":
                     case "4":
                     case "5":
@@ -112,6 +132,13 @@ namespace SportsSection
                         Pause();
                         break;
 
+                    case "20":
+                        SeedTestData(
+                            ids, fullNames, birthYears, sportIds, ranks, enrollmentDates, trainingsPerWeek,
+                            ref traineesCount, ref nextTraineeId, Capacity);
+                        Pause();
+                        break;
+
                     case "0":
                         running = false;
                         Console.WriteLine("Завершення роботи. До побачення!");
@@ -144,11 +171,13 @@ namespace SportsSection
             Console.WriteLine("13 — таблиця відвідуваності секцій");
             Console.WriteLine("14 — розрахунок віку вихованця");
             Console.WriteLine("-----------------------------------------");
-            Console.WriteLine("15 — додати тривалість тренування ");
-            Console.WriteLine("16 — показати список тренувань ");
-            Console.WriteLine("17 — показати статистику та максимум");
-            Console.WriteLine("18 — дослід: значимий та посилальний типи");
-            Console.WriteLine("19 — видалити запис за номером");
+            Console.WriteLine("15 — додати тривалість тренування (Лаб 9)");
+            Console.WriteLine("16 — показати список тренувань (Лаб 9)");
+            Console.WriteLine("17 — показати статистику та максимум (Лаб 9)");
+            Console.WriteLine("18 — дослід: значимий та посилальний типи (Лаб 9)");
+            Console.WriteLine("19 — видалити запис за номером (Лаб 9)");
+            Console.WriteLine("-----------------------------------------");
+            Console.WriteLine("20 — заповнити тестовими записами вихованців (Лаб 10)");
             Console.WriteLine("0  — вихід");
             Console.Write("Ваш вибір: ");
         }
@@ -163,6 +192,127 @@ namespace SportsSection
         static void ShowNotImplemented()
         {
             Console.WriteLine("Цей пункт меню буде реалізовано в наступних роботах.");
+        }
+
+        static void AddTrainee(
+            int[] ids, string[] fullNames, int[] birthYears, int[] sportIds,
+            string[] ranks, DateTime[] enrollmentDates, int[] trainingsPerWeek,
+            ref int count, ref int nextId, int capacity)
+        {
+            Console.WriteLine("=== Додавання нового вихованця ===");
+            if (count >= capacity)
+            {
+                Console.WriteLine("Сховище заповнене (максимум 100 записів), видаліть щось зайве.");
+                return;
+            }
+
+            int currentYear = DateTime.Now.Year;
+            string fullName = ReadText("Прізвище та ім'я: ");
+            int birthYear = ReadInt($"Рік народження (1960 - {currentYear - 4}): ", 1960, currentYear - 4);
+            int sportId = ReadInt("Код виду спорту (1 - Бокс, 2 - Боротьба, 3 - Плавання, 4 - Легка атлетика, 5 - ММА): ", 1, 5);
+            string rank = ReadText("Спортивний розряд (напр. без розряду, III юн., I, КМС): ");
+            DateTime enrollmentDate = ReadDate("Дата вступу (дд.мм.рррр): ", new DateTime(2000, 1, 1), DateTime.Today);
+            int trainings = ReadInt("Кількість тренувань на тиждень (1 - 14): ", 1, 14);
+
+            ids[count] = nextId;
+            fullNames[count] = fullName;
+            birthYears[count] = birthYear;
+            sportIds[count] = sportId;
+            ranks[count] = rank;
+            enrollmentDates[count] = enrollmentDate;
+            trainingsPerWeek[count] = trainings;
+
+            count++;
+            nextId++;
+
+            Console.WriteLine($"\nДодано вихованця №{ids[count - 1]} ({fullName}).");
+        }
+
+        static void SeedTestData(
+            int[] ids, string[] fullNames, int[] birthYears, int[] sportIds,
+            string[] ranks, DateTime[] enrollmentDates, int[] trainingsPerWeek,
+            ref int count, ref int nextId, int capacity)
+        {
+            Console.WriteLine("=== Заповнення тестовими даними ===");
+            string[] sampleNames =
+            {
+                "Коваленко Артем",
+                "Мельник Софія",
+                "Бондаренко Максим",
+                "Ткаченко Ірина",
+                "Шевченко Дмитро",
+                "Савченко Олена"
+            };
+            int[] sampleYears = { 2009, 2011, 2008, 2010, 2007, 2012 };
+            int[] sampleSports = { 5, 3, 1, 4, 2, 3 };
+            string[] sampleRanks = { "I юнацький", "II розряд", "КМС", "I розряд", "II юнацький", "без розряду" };
+            DateTime[] sampleDates =
+            {
+                new DateTime(2024, 9, 2),
+                new DateTime(2023, 10, 15),
+                new DateTime(2022, 1, 20),
+                new DateTime(2024, 2, 11),
+                new DateTime(2023, 5, 4),
+                new DateTime(2025, 9, 1)
+            };
+            int[] sampleTrainings = { 4, 5, 6, 3, 4, 2 };
+
+            int added = 0;
+            for (int i = 0; i < sampleNames.Length; i++)
+            {
+                if (count >= capacity)
+                {
+                    Console.WriteLine("Сховище заповнилося під час додавання тестових записів.");
+                    break;
+                }
+
+                ids[count] = nextId;
+                fullNames[count] = sampleNames[i];
+                birthYears[count] = sampleYears[i];
+                sportIds[count] = sampleSports[i];
+                ranks[count] = sampleRanks[i];
+                enrollmentDates[count] = sampleDates[i];
+                trainingsPerWeek[count] = sampleTrainings[i];
+
+                count++;
+                nextId++;
+                added++;
+            }
+
+            Console.WriteLine($"Додано тестових записів: {added}. Усього в сховищі: {count}.");
+        }
+
+        static string ReadText(string prompt)
+        {
+            while (true)
+            {
+                Console.Write(prompt);
+                string input = Console.ReadLine();
+
+                if (!string.IsNullOrWhiteSpace(input))
+                {
+                    return input.Trim();
+                }
+
+                Console.WriteLine("Помилка: рядок не може бути порожнім.");
+            }
+        }
+
+        static DateTime ReadDate(string prompt, DateTime minDate, DateTime maxDate)
+        {
+            while (true)
+            {
+                Console.Write(prompt);
+                string input = Console.ReadLine()?.Trim();
+
+                if (DateTime.TryParseExact(input, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date)
+                    && date >= minDate && date <= maxDate)
+                {
+                    return date;
+                }
+
+                Console.WriteLine($"Помилка: введіть коректну дату у форматі дд.мм.рррр від {minDate:dd.MM.yyyy} до {maxDate:dd.MM.yyyy}.");
+            }
         }
 
         static void ShowAbout()
@@ -273,7 +423,6 @@ namespace SportsSection
         {
             return currentYear - birthYear;
         }
-
 
         static void AddValue(double[] values, ref int count, double newValue, int capacity)
         {
