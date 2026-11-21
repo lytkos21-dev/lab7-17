@@ -218,8 +218,32 @@ namespace SportsSection
                     $"{ids[i],4} {fullNames[i],-24} {birthYears[i],6} {sportIds[i],7} {ranks[i],-14} {enrollmentDates[i],13:dd.MM.yyyy} {trainingsPerWeek[i],11}");
             }
 
+            int totalTrainings = CalculateTotalTrainings(trainingsPerWeek, count);
+            double averageTrainings = CalculateAverageTrainings(trainingsPerWeek, count);
+
             Console.WriteLine(new string('-', 85));
-            Console.WriteLine($"Записів: {count}.");
+            Console.WriteLine($"Записів: {count}. Загальна кількість тренувань на тиждень: {totalTrainings} (у середньому: {averageTrainings:F2}).");
+        }
+
+        static int CalculateTotalTrainings(int[] trainingsPerWeek, int count)
+        {
+            int total = 0;
+            for (int i = 0; i < count; i++)
+            {
+                total += trainingsPerWeek[i];
+            }
+            return total;
+        }
+
+        static double CalculateAverageTrainings(int[] trainingsPerWeek, int count)
+        {
+            if (count <= 0)
+            {
+                return 0;
+            }
+
+            int total = CalculateTotalTrainings(trainingsPerWeek, count);
+            return (double)total / count;
         }
 
         static void AddTrainee(
