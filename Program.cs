@@ -104,6 +104,14 @@ namespace SportsSection
                         Pause();
                         break;
 
+                    case "19":
+                        Console.WriteLine("=== Видалення запису за номером ===");
+                        PrintValues(trainingHours, trainingCount);
+                        int recordNumber = ReadInt("\nВведіть номер запису для видалення: ", -10, Capacity + 10);
+                        RemoveAt(trainingHours, ref trainingCount, recordNumber - 1);
+                        Pause();
+                        break;
+
                     case "0":
                         running = false;
                         Console.WriteLine("Завершення роботи. До побачення!");
@@ -138,8 +146,9 @@ namespace SportsSection
             Console.WriteLine("-----------------------------------------");
             Console.WriteLine("15 — додати тривалість тренування ");
             Console.WriteLine("16 — показати список тренувань ");
-            Console.WriteLine("17 — показати статистику та максимум ");
-            Console.WriteLine("18 — дослід: значимий та посилальний типи ");
+            Console.WriteLine("17 — показати статистику та максимум");
+            Console.WriteLine("18 — дослід: значимий та посилальний типи");
+            Console.WriteLine("19 — видалити запис за номером");
             Console.WriteLine("0  — вихід");
             Console.Write("Ваш вибір: ");
         }
@@ -327,6 +336,24 @@ namespace SportsSection
             }
 
             average = count > 0 ? sum / count : 0;
+        }
+
+        static void RemoveAt(double[] values, ref int count, int index)
+        {
+            if (index < 0 || index >= count)
+            {
+                Console.WriteLine("Помилка: некоректний номер запису. Видалення не виконано.");
+                return;
+            }
+
+            for (int i = index; i < count - 1; i++)
+            {
+                values[i] = values[i + 1];
+            }
+
+            values[count - 1] = 0;
+            count--;
+            Console.WriteLine($"Запис №{index + 1} видалено.");
         }
 
         static void TryModifyInt(int value)
