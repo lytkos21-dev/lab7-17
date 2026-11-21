@@ -34,7 +34,9 @@ namespace SportsSection
                 switch (choice)
                 {
                     case "1":
-                        ShowNotImplemented();
+                        ShowAllTrainees(
+                            ids, fullNames, birthYears, sportIds, ranks, enrollmentDates, trainingsPerWeek,
+                            traineesCount);
                         Pause();
                         break;
 
@@ -192,6 +194,32 @@ namespace SportsSection
         static void ShowNotImplemented()
         {
             Console.WriteLine("Цей пункт меню буде реалізовано в наступних роботах.");
+        }
+
+        static void ShowAllTrainees(
+            int[] ids, string[] fullNames, int[] birthYears, int[] sportIds,
+            string[] ranks, DateTime[] enrollmentDates, int[] trainingsPerWeek,
+            int count)
+        {
+            Console.WriteLine("=== Список вихованців спортивної секції ===");
+            if (count == 0)
+            {
+                Console.WriteLine("Записів поки немає.");
+                return;
+            }
+
+            Console.WriteLine(
+                $"{"№",4} {"Прізвище та ім'я",-24} {"Рік",6} {"Спорт",7} {"Розряд",-14} {"Дата вступу",13} {"Трен./тиж",11}");
+            Console.WriteLine(new string('-', 85));
+
+            for (int i = 0; i < count; i++)
+            {
+                Console.WriteLine(
+                    $"{ids[i],4} {fullNames[i],-24} {birthYears[i],6} {sportIds[i],7} {ranks[i],-14} {enrollmentDates[i],13:dd.MM.yyyy} {trainingsPerWeek[i],11}");
+            }
+
+            Console.WriteLine(new string('-', 85));
+            Console.WriteLine($"Записів: {count}.");
         }
 
         static void AddTrainee(
