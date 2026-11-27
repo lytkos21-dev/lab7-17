@@ -74,6 +74,11 @@ namespace TaxiService
                         Pause();
                         break;
                     case "6":
+                        ShowSummaryTable(
+                            paymentIds, paymentNames, paymentCount,
+                            tripDates, distances, paymentMethodIds, tripsCount);
+                        Pause();
+                        break;
                     case "7":
                     case "8":
                     case "9":
@@ -212,6 +217,143 @@ namespace TaxiService
         static void ShowNotImplemented()
         {
             Console.WriteLine("Цей пункт меню буде реалізовано в наступних роботах.");
+        }
+
+        static void ShowSummaryTable(
+            int[] paymentIds, string[] paymentNames, int paymentCount,
+            DateTime[] tripDates, double[] distances, int[] paymentMethodIds, int tripsCount)
+        {
+            Console.WriteLine("=== Зведена таблиця по способах оплати та місяцях ===");
+            if (paymentCount == 0)
+            {
+                Console.WriteLine("Довідник способів оплати порожній. Неможливо побудувати зведену таблицю.");
+                return;
+            }
+
+            if (tripsCount == 0)
+            {
+                Console.WriteLine("Сховище поїздок порожнє. Немає даних для зведеної таблиці.");
+                return;
+            }
+
+            Console.WriteLine("1 — кількість поїздок");
+            Console.WriteLine("2 — сумарна відстань поїздок (км)");
+            int mode = ReadInt("Оберіть режим відображення (1 - 2): ", 1, 2);
+            bool sumDistanceMode = mode == 2;
+            Console.WriteLine();
+
+            double[,] grid = BuildSummaryGrid(
+                paymentIds, paymentCount,
+                tripDates, distances, paymentMethodIds, tripsCount,
+                sumDistanceMode);
+
+            PrintSummaryGrid(grid, paymentNames, sumDistanceMode);
+        }
+
+        static double[,] BuildSummaryGrid(
+            int[] paymentIds, int paymentCount,
+            DateTime[] tripDates, double[] distances, int[] paymentMethodIds, int tripsCount,
+            bool sumDistanceMode)
+        {
+            double[,] grid = new double[paymentCount, 12];
+
+            for (int k = 0; k < tripsCount; k++)
+            {
+                int row = FindPaymentIndexById(paymentIds, paymentCount, paymentMethodIds[k]);
+                int col = tripDates[k].Month - 1;
+
+                if (row >= 0 && col >= 0 && col < 12)
+                {
+                    grid[row, col] += sumDistanceMode ? distances[k] : 1.0;
+                }
+            }
+
+            return grid;
+        }
+
+        static void PrintSummaryGrid(double[,] grid, string[] paymentNames, bool sumDistanceMode)
+        {
+            int rows = grid.GetLength(0);
+            int cols = grid.GetLength(1);
+            string[] monthNames = { "Січ", "Лют", "Бер", "Кві", "Тра", "Чер", "Лип", "Сер", "Вер", "Жов", "Лис", "Гру" };
+
+            Console.WriteLine(sumDistanceMode
+                ? "Показник: сумарна відстань поїздок (км)"
+                : "Показник: кількість поїздок");
+
+            Console.Write($"{"Спосіб оплати",-24}");
+            for (int j = 0; j < cols; j++)
+            {
+                Console.Write($"{monthNames[j],6}");
+            }
+            Console.WriteLine($"{"Разом",9}");
+
+            int lineWidth = 24 + cols * 6 + 9;
+            Console.WriteLine(new string('-', lineWidth));
+
+            double[] colTotals = new double[cols];
+            double sumOfRowTotals = 0;
+
+            for (int i = 0; i < rows; i++)
+            {
+                double rowTotal = 0;
+                Console.Write($"{paymentNames[i],-24}");
+
+                for (int j = 0; j < cols; j++)
+                {
+                    rowTotal += grid[i, j];
+                    colTotals[j] += grid[i, j];
+
+                    if (sumDistanceMode)
+                    {
+                        Console.Write($"{grid[i, j],6:F1}");
+                    }
+                    else
+                    {
+                        Console.Write($"{grid[i, j],6:F0}");
+                    }
+                }
+
+                sumOfRowTotals += rowTotal;
+
+                if (sumDistanceMode)
+                {
+                    Console.WriteLine($"{rowTotal,9:F1}");
+                }
+                else
+                {
+                    Console.WriteLine($"{rowTotal,9:F0}");
+                }
+            }
+
+            Console.WriteLine(new string('-', lineWidth));
+            Console.Write($"{"Разом",-24}");
+
+            double sumOfColTotals = 0;
+            for (int j = 0; j < cols; j++)
+            {
+                sumOfColTotals += colTotals[j];
+
+                if (sumDistanceMode)
+                {
+                    Console.Write($"{colTotals[j],6:F1}");
+                }
+                else
+                {
+                    Console.Write($"{colTotals[j],6:F0}");
+                }
+            }
+
+            if (sumDistanceMode)
+            {
+                Console.WriteLine($"{sumOfRowTotals,9:F1}");
+                Console.WriteLine($"\nПеревірка: сума підсумків рядків ({sumOfRowTotals:F1}) = сума підсумків стовпців ({sumOfColTotals:F1}) — збігається.");
+            }
+            else
+            {
+                Console.WriteLine($"{sumOfRowTotals,9:F0}");
+                Console.WriteLine($"\nПеревірка: сума підсумків рядків ({sumOfRowTotals:F0}) = сума підсумків стовпців ({sumOfColTotals:F0}) — збігається.");
+            }
         }
 
         static int FindPaymentIndexById(int[] paymentIds, int paymentCount, int id)
