@@ -47,7 +47,13 @@ namespace TaxiService
                         Pause();
                         break;
                     case "4":
+                        EditTrip(ids, drivers, tripDates, pickupAddresses, destinationAddresses, distances, ratesPerKm, paymentMethodIds, tripsCount);
+                        Pause();
+                        break;
                     case "5":
+                        DeleteTrip(ids, drivers, tripDates, pickupAddresses, destinationAddresses, distances, ratesPerKm, paymentMethodIds, ref tripsCount);
+                        Pause();
+                        break;
                     case "6":
                     case "7":
                     case "8":
@@ -271,6 +277,170 @@ namespace TaxiService
                 Console.WriteLine(new string('-', 102));
                 Console.WriteLine($"Знайдено записів: {foundCount}.");
             }
+        }
+
+        static void EditTrip(int[] ids, string[] drivers, DateTime[] tripDates, string[] pickupAddresses, string[] destinationAddresses, double[] distances, double[] ratesPerKm, int[] paymentMethodIds, int count)
+        {
+            Console.WriteLine("=== Зміна даних поїздки ===");
+            if (count == 0)
+            {
+                Console.WriteLine("Сховище порожнє.");
+                return;
+            }
+
+            int id = ReadInt("Введіть номер поїздки для зміни: ", 1, int.MaxValue);
+            int index = FindIndexById(ids, count, id);
+
+            if (index == -1)
+            {
+                Console.WriteLine($"Поїздки №{id} немає.");
+                return;
+            }
+
+            Console.WriteLine("\nПоточні дані:");
+            PrintTripTableHeader();
+            PrintTripRow(ids[index], drivers[index], tripDates[index], pickupAddresses[index], destinationAddresses[index], distances[index], ratesPerKm[index], paymentMethodIds[index]);
+
+            Console.WriteLine("\nВведіть нові значення (порожній Enter залишає поле без змін):");
+
+            Console.Write($"Водій [{drivers[index]}]: ");
+            string driverInput = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(driverInput))
+            {
+                drivers[index] = driverInput.Trim();
+            }
+
+            while (true)
+            {
+                Console.Write($"Дата й час [{tripDates[index]:dd.MM.yyyy HH:mm}]: ");
+                string dateInput = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(dateInput))
+                {
+                    break;
+                }
+
+                if (DateTime.TryParseExact(dateInput.Trim(), "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime newDate)
+                    && newDate >= new DateTime(2020, 1, 1) && newDate <= DateTime.Now.AddDays(1))
+                {
+                    tripDates[index] = newDate;
+                    break;
+                }
+
+                Console.WriteLine("Помилка: введіть дату й час у форматі дд.мм.рррр гг:хх або натисніть Enter.");
+            }
+
+            Console.Write($"Адреса подачі [{pickupAddresses[index]}]: ");
+            string pickupInput = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(pickupInput))
+            {
+                pickupAddresses[index] = pickupInput.Trim();
+            }
+
+            Console.Write($"Адреса призначення [{destinationAddresses[index]}]: ");
+            string destInput = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(destInput))
+            {
+                destinationAddresses[index] = destInput.Trim();
+            }
+
+            while (true)
+            {
+                Console.Write($"Відстань у км [{distances[index]:F1}]: ");
+                string distInput = Console.ReadLine()?.Replace(',', '.');
+                if (string.IsNullOrWhiteSpace(distInput))
+                {
+                    break;
+                }
+
+                if (double.TryParse(distInput.Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out double newDist)
+                    && newDist >= 0.5 && newDist <= 500.0)
+                {
+                    distances[index] = newDist;
+                    break;
+                }
+
+                Console.WriteLine("Помилка: введіть число від 0.5 до 500 або натисніть Enter.");
+            }
+
+            while (true)
+            {
+                Console.Write($"Тариф за км [{ratesPerKm[index]:F2}]: ");
+                string rateInput = Console.ReadLine()?.Replace(',', '.');
+                if (string.IsNullOrWhiteSpace(rateInput))
+                {
+                    break;
+                }
+
+                if (double.TryParse(rateInput.Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out double newRate)
+                    && newRate >= 5.0 && newRate <= 200.0)
+                {
+                    ratesPerKm[index] = newRate;
+                    break;
+                }
+
+                Console.WriteLine("Помилка: введіть число від 5 до 200 або натисніть Enter.");
+            }
+
+            while (true)
+            {
+                Console.Write($"Код способу оплати (1-3) [{paymentMethodIds[index]}]: ");
+                string payInput = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(payInput))
+                {
+                    break;
+                }
+
+                if (int.TryParse(payInput.Trim(), out int newPay) && newPay >= 1 && newPay <= 3)
+                {
+                    paymentMethodIds[index] = newPay;
+                    break;
+                }
+
+                Console.WriteLine("Помилка: введіть ціле число від 1 до 3 або натисніть Enter.");
+            }
+
+            Console.WriteLine($"\nПоїздку №{id} успішно оновлено.");
+        }
+
+        static void DeleteTrip(int[] ids, string[] drivers, DateTime[] tripDates, string[] pickupAddresses, string[] destinationAddresses, double[] distances, double[] ratesPerKm, int[] paymentMethodIds, ref int count)
+        {
+            Console.WriteLine("=== Видалення поїздки ===");
+            if (count == 0)
+            {
+                Console.WriteLine("Сховище порожнє.");
+                return;
+            }
+
+            int id = ReadInt("Введіть номер поїздки для видалення: ", 1, int.MaxValue);
+            int index = FindIndexById(ids, count, id);
+
+            if (index == -1)
+            {
+                Console.WriteLine($"Поїздки №{id} немає.");
+                return;
+            }
+
+            Console.Write($"Справді видалити поїздку №{id} (водій: {drivers[index]})? (так/ні): ");
+            if (Console.ReadLine()?.Trim().ToLower() != "так")
+            {
+                Console.WriteLine("Видалення скасовано.");
+                return;
+            }
+
+            for (int i = index; i < count - 1; i++)
+            {
+                ids[i] = ids[i + 1];
+                drivers[i] = drivers[i + 1];
+                tripDates[i] = tripDates[i + 1];
+                pickupAddresses[i] = pickupAddresses[i + 1];
+                destinationAddresses[i] = destinationAddresses[i + 1];
+                distances[i] = distances[i + 1];
+                ratesPerKm[i] = ratesPerKm[i + 1];
+                paymentMethodIds[i] = paymentMethodIds[i + 1];
+            }
+
+            count--;
+            Console.WriteLine($"Поїздку №{id} видалено. Лишилося записів: {count}.");
         }
 
         static void ShowAllTrips(int[] ids, string[] drivers, DateTime[] tripDates, string[] pickupAddresses, string[] destinationAddresses, double[] distances, double[] ratesPerKm, int[] paymentMethodIds, int count)
