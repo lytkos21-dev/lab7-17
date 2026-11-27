@@ -23,6 +23,13 @@ namespace TaxiService
             int tripsCount = 0;
             int nextTripId = 1;
 
+            const int PaymentCapacity = 20;
+            int[] paymentIds = new int[PaymentCapacity];
+            string[] paymentNames = new string[PaymentCapacity];
+            bool[] paymentActive = new bool[PaymentCapacity];
+            int paymentCount = 0;
+            int nextPaymentId = 1;
+
             double[] sampleDistances = new double[Capacity];
             int sampleDistancesCount = 0;
 
@@ -58,8 +65,11 @@ namespace TaxiService
                     case "7":
                     case "8":
                     case "9":
-                    case "10":
                         ShowNotImplemented();
+                        Pause();
+                        break;
+                    case "10":
+                        ManagePaymentMethods(paymentIds, paymentNames, paymentActive, ref paymentCount, ref nextPaymentId, PaymentCapacity);
                         Pause();
                         break;
                     case "11":
@@ -127,7 +137,10 @@ namespace TaxiService
                         Pause();
                         break;
                     case "20":
-                        SeedTestData(ids, drivers, tripDates, pickupAddresses, destinationAddresses, distances, ratesPerKm, paymentMethodIds, ref tripsCount, ref nextTripId, Capacity);
+                        SeedTestData(
+                            ids, drivers, tripDates, pickupAddresses, destinationAddresses,
+                            distances, ratesPerKm, paymentMethodIds, ref tripsCount, ref nextTripId, Capacity,
+                            paymentIds, paymentNames, paymentActive, ref paymentCount, ref nextPaymentId, PaymentCapacity);
                         Pause();
                         break;
                     case "21":
@@ -171,7 +184,7 @@ namespace TaxiService
             Console.WriteLine("18 — дослід: значимий та посилальний типи (Лаб 9)");
             Console.WriteLine("19 — видалити запис за номером (Лаб 9)");
             Console.WriteLine("-----------------------------------------");
-            Console.WriteLine("20 — заповнити тестовими поїздками (Лаб 10)");
+            Console.WriteLine("20 — заповнити тестовими даними (Лаб 10/12)");
             Console.WriteLine("21 — підсумки поїздок (Лаб 11)");
             Console.WriteLine("0  — вихід");
             Console.Write("Ваш вибір: ");
@@ -187,6 +200,151 @@ namespace TaxiService
         static void ShowNotImplemented()
         {
             Console.WriteLine("Цей пункт меню буде реалізовано в наступних роботах.");
+        }
+
+        static int FindPaymentIndexById(int[] paymentIds, int paymentCount, int id)
+        {
+            for (int i = 0; i < paymentCount; i++)
+            {
+                if (paymentIds[i] == id)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        static string GetPaymentMethodName(int[] paymentIds, string[] paymentNames, int paymentCount, int id)
+        {
+            for (int i = 0; i < paymentCount; i++)
+            {
+                if (paymentIds[i] == id)
+                {
+                    return paymentNames[i];
+                }
+            }
+            return "(невідомий)";
+        }
+
+        static void ManagePaymentMethods(
+            int[] paymentIds, string[] paymentNames, bool[] paymentActive,
+            ref int paymentCount, ref int nextPaymentId, int capacity)
+        {
+            bool inDirectory = true;
+            while (inDirectory)
+            {
+                Console.WriteLine("=== Довідник: Способи оплати ===");
+                Console.WriteLine("1 — показати всі способи оплати");
+                Console.WriteLine("2 — додати спосіб оплати");
+                Console.WriteLine("3 — вимкнути спосіб оплати");
+                Console.WriteLine("0 — повернутися в головне меню");
+                string subChoice = ReadText("Ваш вибір: ");
+                Console.WriteLine();
+
+                switch (subChoice)
+                {
+                    case "1":
+                        ShowAllPaymentMethods(paymentIds, paymentNames, paymentActive, paymentCount);
+                        Console.WriteLine();
+                        break;
+                    case "2":
+                        AddPaymentMethod(paymentIds, paymentNames, paymentActive, ref paymentCount, ref nextPaymentId, capacity);
+                        Console.WriteLine();
+                        break;
+                    case "3":
+                        DeactivatePaymentMethod(paymentIds, paymentNames, paymentActive, paymentCount);
+                        Console.WriteLine();
+                        break;
+                    case "0":
+                        inDirectory = false;
+                        break;
+                    default:
+                        Console.WriteLine("Немає такого пункту.\n");
+                        break;
+                }
+            }
+        }
+
+        static void ShowAllPaymentMethods(int[] paymentIds, string[] paymentNames, bool[] paymentActive, int paymentCount)
+        {
+            Console.WriteLine("=== Перелік способів оплати ===");
+            if (paymentCount == 0)
+            {
+                Console.WriteLine("Довідник способів оплати порожній.");
+                return;
+            }
+
+            Console.WriteLine($"{"Код",4} {"Назва",-26} {"Стан",-12}");
+            Console.WriteLine(new string('-', 44));
+
+            for (int i = 0; i < paymentCount; i++)
+            {
+                string statusText = paymentActive[i] ? "Активний" : "Вимкнений";
+                Console.WriteLine($"{paymentIds[i],4} {paymentNames[i],-26} {statusText,-12}");
+            }
+
+            Console.WriteLine(new string('-', 44));
+            Console.WriteLine($"Усього позицій у довіднику: {paymentCount}.");
+        }
+
+        static void AddPaymentMethod(
+            int[] paymentIds, string[] paymentNames, bool[] paymentActive,
+            ref int paymentCount, ref int nextPaymentId, int capacity)
+        {
+            Console.WriteLine("=== Додавання способу оплати ===");
+            if (paymentCount >= capacity)
+            {
+                Console.WriteLine("Довідник заповнений.");
+                return;
+            }
+
+            string name = ReadText("Назва способу оплати: ");
+
+            for (int i = 0; i < paymentCount; i++)
+            {
+                if (paymentNames[i].ToLower() == name.ToLower())
+                {
+                    Console.WriteLine("Такий спосіб оплати вже є в довіднику.");
+                    return;
+                }
+            }
+
+            paymentIds[paymentCount] = nextPaymentId;
+            paymentNames[paymentCount] = name;
+            paymentActive[paymentCount] = true;
+            paymentCount++;
+            nextPaymentId++;
+
+            Console.WriteLine($"Спосіб оплати «{name}» додано під кодом №{paymentIds[paymentCount - 1]}.");
+        }
+
+        static void DeactivatePaymentMethod(int[] paymentIds, string[] paymentNames, bool[] paymentActive, int paymentCount)
+        {
+            Console.WriteLine("=== Вимкнення способу оплати ===");
+            if (paymentCount == 0)
+            {
+                Console.WriteLine("Довідник способів оплати порожній.");
+                return;
+            }
+
+            ShowAllPaymentMethods(paymentIds, paymentNames, paymentActive, paymentCount);
+            int id = ReadInt("\nВведіть код способу оплати для вимкнення: ", 1, int.MaxValue);
+            int index = FindPaymentIndexById(paymentIds, paymentCount, id);
+
+            if (index == -1)
+            {
+                Console.WriteLine($"Способу оплати з кодом №{id} немає.");
+                return;
+            }
+
+            if (!paymentActive[index])
+            {
+                Console.WriteLine($"Спосіб оплати «{paymentNames[index]}» уже вимкнений.");
+                return;
+            }
+
+            paymentActive[index] = false;
+            Console.WriteLine($"Спосіб оплати «{paymentNames[index]}» (код №{id}) вимкнено.");
         }
 
         static int FindIndexById(int[] ids, int count, int id)
@@ -592,18 +750,38 @@ namespace TaxiService
             Console.WriteLine($"\nДодано поїздку №{ids[count - 1]} (водій: {driver}).");
         }
 
-        static void SeedTestData(int[] ids, string[] drivers, DateTime[] tripDates, string[] pickupAddresses, string[] destinationAddresses, double[] distances, double[] ratesPerKm, int[] paymentMethodIds, ref int count, ref int nextId, int capacity)
+        static void SeedTestData(
+            int[] ids, string[] drivers, DateTime[] tripDates, string[] pickupAddresses,
+            string[] destinationAddresses, double[] distances, double[] ratesPerKm,
+            int[] paymentMethodIds, ref int count, ref int nextId, int capacity,
+            int[] paymentIds, string[] paymentNames, bool[] paymentActive,
+            ref int paymentCount, ref int nextPaymentId, int paymentCapacity)
         {
             Console.WriteLine("=== Заповнення тестовими даними ===");
+
+            if (paymentCount == 0)
+            {
+                string[] defaultPayments = { "Готівка", "Банківська картка", "Apple Pay / Google Pay", "Безготівковий розрахунок" };
+                for (int i = 0; i < defaultPayments.Length && paymentCount < paymentCapacity; i++)
+                {
+                    paymentIds[paymentCount] = nextPaymentId;
+                    paymentNames[paymentCount] = defaultPayments[i];
+                    paymentActive[paymentCount] = true;
+                    paymentCount++;
+                    nextPaymentId++;
+                }
+                Console.WriteLine($"Довідник заповнено базовими способами оплати: {paymentCount}.");
+            }
+
             string[] sampleDrivers = { "Ковач Василь", "Мельник Андрій", "Бондар Олег", "Ткачук Ігор", "Савченко Тарас", "Гнатюк Роман" };
             DateTime[] sampleDates =
             {
-                new DateTime(2026, 11, 20, 8, 30, 0),
-                new DateTime(2026, 11, 20, 10, 15, 0),
-                new DateTime(2026, 11, 21, 14, 45, 0),
-                new DateTime(2026, 11, 22, 18, 10, 0),
-                new DateTime(2026, 11, 23, 21, 05, 0),
-                new DateTime(2026, 11, 24, 9, 20, 0)
+                new DateTime(2026, 1, 20, 8, 30, 0),
+                new DateTime(2026, 2, 14, 10, 15, 0),
+                new DateTime(2026, 2, 21, 14, 45, 0),
+                new DateTime(2026, 3, 12, 18, 10, 0),
+                new DateTime(2026, 4, 23, 21, 05, 0),
+                new DateTime(2026, 5, 24, 9, 20, 0)
             };
             string[] samplePickups = { "пл. Петефі, 14", "вул. Собранецька, 89", "Залізничний вокзал", "пр. Свободи, 22", "вул. Корзо, 5", "вул. Минайська, 16" };
             string[] sampleDestinations = { "Боздоський парк", "вул. Капушанська, 40", "пл. Корятовича, 2", "вул. Заньковецької, 11", "Аеропорт Ужгород", "вул. Грушевського, 33" };
