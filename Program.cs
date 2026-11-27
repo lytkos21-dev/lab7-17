@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Text;
 
-namespace SportsSection
+namespace TaxiService
 {
     internal class Program
     {
@@ -13,17 +13,18 @@ namespace SportsSection
 
             const int Capacity = 100;
             int[] ids = new int[Capacity];
-            string[] fullNames = new string[Capacity];
-            int[] birthYears = new int[Capacity];
-            int[] sportIds = new int[Capacity];
-            string[] ranks = new string[Capacity];
-            DateTime[] enrollmentDates = new DateTime[Capacity];
-            int[] trainingsPerWeek = new int[Capacity];
-            int traineesCount = 0;
-            int nextTraineeId = 1;
+            string[] drivers = new string[Capacity];
+            DateTime[] tripDates = new DateTime[Capacity];
+            string[] pickupAddresses = new string[Capacity];
+            string[] destinationAddresses = new string[Capacity];
+            double[] distances = new double[Capacity];
+            double[] ratesPerKm = new double[Capacity];
+            int[] paymentMethodIds = new int[Capacity];
+            int tripsCount = 0;
+            int nextTripId = 1;
 
-            double[] trainingHours = new double[Capacity];
-            int trainingCount = 0;
+            double[] sampleDistances = new double[Capacity];
+            int sampleDistancesCount = 0;
 
             while (running)
             {
@@ -34,16 +35,17 @@ namespace SportsSection
                 switch (choice)
                 {
                     case "1":
-                        ShowAllTrainees(
-                            ids, fullNames, birthYears, sportIds, ranks, enrollmentDates, trainingsPerWeek,
-                            traineesCount);
+                        ShowAllTrips(
+                            ids, drivers, tripDates, pickupAddresses, destinationAddresses,
+                            distances, ratesPerKm, paymentMethodIds, tripsCount);
                         Pause();
                         break;
 
                     case "2":
-                        AddTrainee(
-                            ids, fullNames, birthYears, sportIds, ranks, enrollmentDates, trainingsPerWeek,
-                            ref traineesCount, ref nextTraineeId, Capacity);
+                        AddTrip(
+                            ids, drivers, tripDates, pickupAddresses, destinationAddresses,
+                            distances, ratesPerKm, paymentMethodIds,
+                            ref tripsCount, ref nextTripId, Capacity);
                         Pause();
                         break;
 
@@ -70,56 +72,56 @@ namespace SportsSection
                         break;
 
                     case "13":
-                        RunAttendanceTable();
+                        RunDriversTable();
                         Pause();
                         break;
 
                     case "14":
-                        RunAgeCalculation();
+                        RunSingleTripCostCalculation();
                         Pause();
                         break;
 
                     case "15":
-                        Console.WriteLine("=== Додавання тривалості тренування ===");
-                        double hours = ReadDouble("Введіть тривалість тренування (0.5 - 12 год): ", 0.5, 12.0);
-                        AddValue(trainingHours, ref trainingCount, hours, Capacity);
-                        Console.WriteLine($"Поточна кількість записів у Main: {trainingCount}");
+                        Console.WriteLine("=== Додавання відстані поїздки ===");
+                        double dist = ReadDouble("Введіть відстань поїздки (0.5 - 500 км): ", 0.5, 500.0);
+                        AddValue(sampleDistances, ref sampleDistancesCount, dist, Capacity);
+                        Console.WriteLine($"Поточна кількість записів у Main: {sampleDistancesCount}");
                         Pause();
                         break;
 
                     case "16":
-                        Console.WriteLine("=== Список зафіксованих тренувань ===");
-                        PrintValues(trainingHours, trainingCount);
+                        Console.WriteLine("=== Список зафіксованих відстаней ===");
+                        PrintValues(sampleDistances, sampleDistancesCount);
                         Pause();
                         break;
 
                     case "17":
-                        Console.WriteLine("=== Статистика тренувань ===");
-                        if (trainingCount == 0)
+                        Console.WriteLine("=== Статистика відстаней ===");
+                        if (sampleDistancesCount == 0)
                         {
                             Console.WriteLine("Масив порожній. Спочатку додайте хоча б одне значення.");
                         }
                         else
                         {
-                            FindMax(trainingHours, trainingCount, out double maxVal, out int maxIdx);
-                            CalculateStatistics(trainingHours, trainingCount, out double sum, out double avg);
+                            FindMax(sampleDistances, sampleDistancesCount, out double maxVal, out int maxIdx);
+                            CalculateStatistics(sampleDistances, sampleDistancesCount, out double sum, out double avg);
 
-                            Console.WriteLine($"Кількість записів:    {trainingCount}");
-                            Console.WriteLine($"Загальна тривалість:  {sum:F2} год");
-                            Console.WriteLine($"Середня тривалість:   {avg:F2} год");
-                            Console.WriteLine($"Найдовше тренування:  {maxVal:F2} год (запис №{maxIdx + 1})");
+                            Console.WriteLine($"Кількість записів:    {sampleDistancesCount}");
+                            Console.WriteLine($"Загальний пробіг:     {sum:F2} км");
+                            Console.WriteLine($"Середня відстань:     {avg:F2} км");
+                            Console.WriteLine($"Найдовша поїздка:     {maxVal:F2} км (запис №{maxIdx + 1})");
                         }
                         Pause();
                         break;
 
                     case "18":
                         Console.WriteLine("=== Дослід: значимий тип (int) та посилальний тип (масив) ===");
-                        int sessions = 5;
-                        Console.WriteLine($"1. Значимий тип (int): до виклику методу sessions = {sessions}");
-                        TryModifyInt(sessions);
-                        Console.WriteLine($"   Після виклику TryModifyInt(sessions): sessions = {sessions} (не змінилося, передалась копія)");
+                        int orders = 5;
+                        Console.WriteLine($"1. Значимий тип (int): до виклику методу orders = {orders}");
+                        TryModifyInt(orders);
+                        Console.WriteLine($"   Після виклику TryModifyInt(orders): orders = {orders} (не змінилося, передалась копія)");
 
-                        double[] sample = { 1.5, 2.0, 2.5 };
+                        double[] sample = { 3.5, 7.0, 12.2 };
                         Console.WriteLine($"\n2. Посилальний тип (double[]): до виклику методу sample[0] = {sample[0]:F1}");
                         ModifyArrayElement(sample);
                         Console.WriteLine($"   Після виклику ModifyArrayElement(sample): sample[0] = {sample[0]:F1} (змінилося, передалась адреса)");
@@ -128,16 +130,17 @@ namespace SportsSection
 
                     case "19":
                         Console.WriteLine("=== Видалення запису за номером ===");
-                        PrintValues(trainingHours, trainingCount);
+                        PrintValues(sampleDistances, sampleDistancesCount);
                         int recordNumber = ReadInt("\nВведіть номер запису для видалення: ", -10, Capacity + 10);
-                        RemoveAt(trainingHours, ref trainingCount, recordNumber - 1);
+                        RemoveAt(sampleDistances, ref sampleDistancesCount, recordNumber - 1);
                         Pause();
                         break;
 
                     case "20":
                         SeedTestData(
-                            ids, fullNames, birthYears, sportIds, ranks, enrollmentDates, trainingsPerWeek,
-                            ref traineesCount, ref nextTraineeId, Capacity);
+                            ids, drivers, tripDates, pickupAddresses, destinationAddresses,
+                            distances, ratesPerKm, paymentMethodIds,
+                            ref tripsCount, ref nextTripId, Capacity);
                         Pause();
                         break;
 
@@ -156,30 +159,30 @@ namespace SportsSection
 
         static void ShowMenu()
         {
-            Console.WriteLine("=== Спортивна секція ===");
-            Console.WriteLine("1  — показати всіх вихованців");
-            Console.WriteLine("2  — додати вихованця");
+            Console.WriteLine("=== Служба таксі ===");
+            Console.WriteLine("1  — показати всі поїздки");
+            Console.WriteLine("2  — додати поїздку");
             Console.WriteLine("3  — знайти за умовою");
             Console.WriteLine("4  — змінити запис");
             Console.WriteLine("5  — видалити запис");
-            Console.WriteLine("6  — зведена таблиця (вікові групи)");
+            Console.WriteLine("6  — зведена таблиця");
             Console.WriteLine("7  — зберегти у файл");
             Console.WriteLine("8  — завантажити з файлу");
             Console.WriteLine("9  — експорт у CSV");
-            Console.WriteLine("10 — довідник видів спорту");
+            Console.WriteLine("10 — довідник способів оплати");
             Console.WriteLine("-----------------------------------------");
             Console.WriteLine("11 — довідка про програму");
-            Console.WriteLine("12 — табулювання вартості занять");
-            Console.WriteLine("13 — таблиця відвідуваності секцій");
-            Console.WriteLine("14 — розрахунок віку вихованця");
+            Console.WriteLine("12 — табулювання вартості поїздки");
+            Console.WriteLine("13 — таблиця замовлень водіїв по днях");
+            Console.WriteLine("14 — розрахунок вартості однієї поїздки");
             Console.WriteLine("-----------------------------------------");
-            Console.WriteLine("15 — додати тривалість тренування (Лаб 9)");
-            Console.WriteLine("16 — показати список тренувань (Лаб 9)");
+            Console.WriteLine("15 — додати відстань поїздки (Лаб 9)");
+            Console.WriteLine("16 — показати список відстаней (Лаб 9)");
             Console.WriteLine("17 — показати статистику та максимум (Лаб 9)");
             Console.WriteLine("18 — дослід: значимий та посилальний типи (Лаб 9)");
             Console.WriteLine("19 — видалити запис за номером (Лаб 9)");
             Console.WriteLine("-----------------------------------------");
-            Console.WriteLine("20 — заповнити тестовими записами вихованців (Лаб 10)");
+            Console.WriteLine("20 — заповнити тестовими поїздками (Лаб 10)");
             Console.WriteLine("0  — вихід");
             Console.Write("Ваш вибір: ");
         }
@@ -196,12 +199,12 @@ namespace SportsSection
             Console.WriteLine("Цей пункт меню буде реалізовано в наступних роботах.");
         }
 
-        static void ShowAllTrainees(
-            int[] ids, string[] fullNames, int[] birthYears, int[] sportIds,
-            string[] ranks, DateTime[] enrollmentDates, int[] trainingsPerWeek,
-            int count)
+        static void ShowAllTrips(
+            int[] ids, string[] drivers, DateTime[] tripDates, string[] pickupAddresses,
+            string[] destinationAddresses, double[] distances, double[] ratesPerKm,
+            int[] paymentMethodIds, int count)
         {
-            Console.WriteLine("=== Список вихованців спортивної секції ===");
+            Console.WriteLine("=== Список поїздок служби таксі ===");
             if (count == 0)
             {
                 Console.WriteLine("Записів поки немає.");
@@ -209,108 +212,125 @@ namespace SportsSection
             }
 
             Console.WriteLine(
-                $"{"№",4} {"Прізвище та ім'я",-24} {"Рік",6} {"Спорт",7} {"Розряд",-14} {"Дата вступу",13} {"Трен./тиж",11}");
-            Console.WriteLine(new string('-', 85));
+                $"{"№",4} {"Водій",-18} {"Дата й час",-17} {"Звідки",-18} {"Куди",-18} {"Км",7} {"Тариф",8} {"Опл.",5}");
+            Console.WriteLine(new string('-', 102));
 
             for (int i = 0; i < count; i++)
             {
                 Console.WriteLine(
-                    $"{ids[i],4} {fullNames[i],-24} {birthYears[i],6} {sportIds[i],7} {ranks[i],-14} {enrollmentDates[i],13:dd.MM.yyyy} {trainingsPerWeek[i],11}");
+                    $"{ids[i],4} {drivers[i],-18} {tripDates[i],-17:dd.MM.yyyy HH:mm} {pickupAddresses[i],-18} {destinationAddresses[i],-18} {distances[i],7:F1} {ratesPerKm[i],8:F2} {paymentMethodIds[i],5}");
             }
 
-            int totalTrainings = CalculateTotalTrainings(trainingsPerWeek, count);
-            double averageTrainings = CalculateAverageTrainings(trainingsPerWeek, count);
+            double totalRevenue = CalculateTotalRevenue(distances, ratesPerKm, count);
+            double totalDistance = CalculateTotalDistance(distances, count);
 
-            Console.WriteLine(new string('-', 85));
-            Console.WriteLine($"Записів: {count}. Загальна кількість тренувань на тиждень: {totalTrainings} (у середньому: {averageTrainings:F2}).");
+            Console.WriteLine(new string('-', 102));
+            Console.WriteLine($"Записів: {count}. Загальний пробіг: {totalDistance:F1} км. Загальна вартість поїздок: {totalRevenue:F2} грн.");
         }
 
-        static int CalculateTotalTrainings(int[] trainingsPerWeek, int count)
+        static double CalculateTotalRevenue(double[] distances, double[] ratesPerKm, int count)
         {
-            int total = 0;
+            double total = 0;
             for (int i = 0; i < count; i++)
             {
-                total += trainingsPerWeek[i];
+                total += distances[i] * ratesPerKm[i];
             }
             return total;
         }
 
-        static double CalculateAverageTrainings(int[] trainingsPerWeek, int count)
+        static double CalculateTotalDistance(double[] distances, int count)
         {
-            if (count <= 0)
+            double total = 0;
+            for (int i = 0; i < count; i++)
             {
-                return 0;
+                total += distances[i];
             }
-
-            int total = CalculateTotalTrainings(trainingsPerWeek, count);
-            return (double)total / count;
+            return total;
         }
 
-        static void AddTrainee(
-            int[] ids, string[] fullNames, int[] birthYears, int[] sportIds,
-            string[] ranks, DateTime[] enrollmentDates, int[] trainingsPerWeek,
-            ref int count, ref int nextId, int capacity)
+        static void AddTrip(
+            int[] ids, string[] drivers, DateTime[] tripDates, string[] pickupAddresses,
+            string[] destinationAddresses, double[] distances, double[] ratesPerKm,
+            int[] paymentMethodIds, ref int count, ref int nextId, int capacity)
         {
-            Console.WriteLine("=== Додавання нового вихованця ===");
+            Console.WriteLine("=== Додавання нової поїздки ===");
             if (count >= capacity)
             {
                 Console.WriteLine("Сховище заповнене (максимум 100 записів), видаліть щось зайве.");
                 return;
             }
 
-            int currentYear = DateTime.Now.Year;
-            string fullName = ReadText("Прізвище та ім'я: ");
-            int birthYear = ReadInt($"Рік народження (1960 - {currentYear - 4}): ", 1960, currentYear - 4);
-            int sportId = ReadInt("Код виду спорту (1 - Бокс, 2 - Боротьба, 3 - Плавання, 4 - Легка атлетика, 5 - ММА): ", 1, 5);
-            string rank = ReadText("Спортивний розряд (напр. без розряду, III юн., I, КМС): ");
-            DateTime enrollmentDate = ReadDate("Дата вступу (дд.мм.рррр): ", new DateTime(2000, 1, 1), DateTime.Today);
-            int trainings = ReadInt("Кількість тренувань на тиждень (1 - 14): ", 1, 14);
+            string driver = ReadText("Водій (прізвище та ім'я): ");
+            DateTime tripDate = ReadDateTime("Дата й час поїздки (дд.мм.рррр гг:хх): ", new DateTime(2020, 1, 1), DateTime.Now.AddDays(1));
+            string pickup = ReadText("Адреса подачі: ");
+            string destination = ReadText("Адреса призначення: ");
+            double distance = ReadDouble("Відстань у км (0.5 - 500): ", 0.5, 500.0);
+            double rate = ReadDouble("Тариф за км, грн (5 - 200): ", 5.0, 200.0);
+            int paymentId = ReadInt("Код способу оплати (1 - Готівка, 2 - Картка, 3 - Apple/Google Pay): ", 1, 3);
 
             ids[count] = nextId;
-            fullNames[count] = fullName;
-            birthYears[count] = birthYear;
-            sportIds[count] = sportId;
-            ranks[count] = rank;
-            enrollmentDates[count] = enrollmentDate;
-            trainingsPerWeek[count] = trainings;
+            drivers[count] = driver;
+            tripDates[count] = tripDate;
+            pickupAddresses[count] = pickup;
+            destinationAddresses[count] = destination;
+            distances[count] = distance;
+            ratesPerKm[count] = rate;
+            paymentMethodIds[count] = paymentId;
 
             count++;
             nextId++;
 
-            Console.WriteLine($"\nДодано вихованця №{ids[count - 1]} ({fullName}).");
+            Console.WriteLine($"\nДодано поїздку №{ids[count - 1]} (водій: {driver}).");
         }
 
         static void SeedTestData(
-            int[] ids, string[] fullNames, int[] birthYears, int[] sportIds,
-            string[] ranks, DateTime[] enrollmentDates, int[] trainingsPerWeek,
-            ref int count, ref int nextId, int capacity)
+            int[] ids, string[] drivers, DateTime[] tripDates, string[] pickupAddresses,
+            string[] destinationAddresses, double[] distances, double[] ratesPerKm,
+            int[] paymentMethodIds, ref int count, ref int nextId, int capacity)
         {
             Console.WriteLine("=== Заповнення тестовими даними ===");
-            string[] sampleNames =
+            string[] sampleDrivers =
             {
-                "Коваленко Артем",
-                "Мельник Софія",
-                "Бондаренко Максим",
-                "Ткаченко Ірина",
-                "Шевченко Дмитро",
-                "Савченко Олена"
+                "Ковач Василь",
+                "Мельник Андрій",
+                "Бондар Олег",
+                "Ткачук Ігор",
+                "Савченко Тарас",
+                "Гнатюк Роман"
             };
-            int[] sampleYears = { 2009, 2011, 2008, 2010, 2007, 2012 };
-            int[] sampleSports = { 5, 3, 1, 4, 2, 3 };
-            string[] sampleRanks = { "I юнацький", "II розряд", "КМС", "I розряд", "II юнацький", "без розряду" };
             DateTime[] sampleDates =
             {
-                new DateTime(2024, 9, 2),
-                new DateTime(2023, 10, 15),
-                new DateTime(2022, 1, 20),
-                new DateTime(2024, 2, 11),
-                new DateTime(2023, 5, 4),
-                new DateTime(2025, 9, 1)
+                new DateTime(2026, 11, 20, 8, 30, 0),
+                new DateTime(2026, 11, 20, 10, 15, 0),
+                new DateTime(2026, 11, 21, 14, 45, 0),
+                new DateTime(2026, 11, 22, 18, 10, 0),
+                new DateTime(2026, 11, 23, 21, 05, 0),
+                new DateTime(2026, 11, 24, 9, 20, 0)
             };
-            int[] sampleTrainings = { 4, 5, 6, 3, 4, 2 };
+            string[] samplePickups =
+            {
+                "пл. Петефі, 14",
+                "вул. Собранецька, 89",
+                "Залізничний вокзал",
+                "пр. Свободи, 22",
+                "вул. Корзо, 5",
+                "вул. Минайська, 16"
+            };
+            string[] sampleDestinations =
+            {
+                "Боздоський парк",
+                "вул. Капушанська, 40",
+                "пл. Корятовича, 2",
+                "вул. Заньковецької, 11",
+                "Аеропорт Ужгород",
+                "вул. Грушевського, 33"
+            };
+            double[] sampleDist = { 4.2, 6.5, 3.8, 5.1, 7.4, 2.9 };
+            double[] sampleRates = { 18.0, 18.0, 20.0, 18.0, 22.0, 18.0 };
+            int[] samplePayments = { 2, 1, 3, 2, 3, 1 };
 
             int added = 0;
-            for (int i = 0; i < sampleNames.Length; i++)
+            for (int i = 0; i < sampleDrivers.Length; i++)
             {
                 if (count >= capacity)
                 {
@@ -319,19 +339,20 @@ namespace SportsSection
                 }
 
                 ids[count] = nextId;
-                fullNames[count] = sampleNames[i];
-                birthYears[count] = sampleYears[i];
-                sportIds[count] = sampleSports[i];
-                ranks[count] = sampleRanks[i];
-                enrollmentDates[count] = sampleDates[i];
-                trainingsPerWeek[count] = sampleTrainings[i];
+                drivers[count] = sampleDrivers[i];
+                tripDates[count] = sampleDates[i];
+                pickupAddresses[count] = samplePickups[i];
+                destinationAddresses[count] = sampleDestinations[i];
+                distances[count] = sampleDist[i];
+                ratesPerKm[count] = sampleRates[i];
+                paymentMethodIds[count] = samplePayments[i];
 
                 count++;
                 nextId++;
                 added++;
             }
 
-            Console.WriteLine($"Додано тестових записів: {added}. Усього в сховищі: {count}.");
+            Console.WriteLine($"Додано тестових поїздок: {added}. Усього в сховищі: {count}.");
         }
 
         static string ReadText(string prompt)
@@ -350,85 +371,86 @@ namespace SportsSection
             }
         }
 
-        static DateTime ReadDate(string prompt, DateTime minDate, DateTime maxDate)
+        static DateTime ReadDateTime(string prompt, DateTime minDate, DateTime maxDate)
         {
             while (true)
             {
                 Console.Write(prompt);
                 string input = Console.ReadLine()?.Trim();
 
-                if (DateTime.TryParseExact(input, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date)
-                    && date >= minDate && date <= maxDate)
+                if (DateTime.TryParseExact(input, "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateTime)
+                    && dateTime >= minDate && dateTime <= maxDate)
                 {
-                    return date;
+                    return dateTime;
                 }
 
-                Console.WriteLine($"Помилка: введіть коректну дату у форматі дд.мм.рррр від {minDate:dd.MM.yyyy} до {maxDate:dd.MM.yyyy}.");
+                Console.WriteLine($"Помилка: введіть коректні дату й час у форматі дд.мм.рррр гг:хх від {minDate:dd.MM.yyyy HH:mm} до {maxDate:dd.MM.yyyy HH:mm}.");
             }
         }
 
         static void ShowAbout()
         {
             Console.WriteLine("=== Довідка про застосунок ===");
-            Console.WriteLine("Тема №12: Спортивна секція");
-            Console.WriteLine("Сутності: Користувач, Вихованець (головна), Вид спорту (довідник)");
-            Console.WriteLine("\nПоля сутності «Вихованець»:");
+            Console.WriteLine("Тема №13: Служба таксі");
+            Console.WriteLine("Сутності: Користувач, Поїздка (головна), Спосіб оплати (довідник)");
+            Console.WriteLine("\nПоля сутності «Поїздка»:");
             Console.WriteLine("  1. Номер (int)");
-            Console.WriteLine("  2. Прізвище та ім'я (string)");
-            Console.WriteLine("  3. Рік народження (int)");
-            Console.WriteLine("  4. Код виду спорту з довідника (int)");
-            Console.WriteLine("  5. Розряд (string)");
-            Console.WriteLine("  6. Дата вступу (DateTime)");
-            Console.WriteLine("  7. Кількість тренувань на тиждень (int)");
+            Console.WriteLine("  2. Водій (string)");
+            Console.WriteLine("  3. Дата й час (DateTime)");
+            Console.WriteLine("  4. Адреса подачі (string)");
+            Console.WriteLine("  5. Адреса призначення (string)");
+            Console.WriteLine("  6. Відстань у км (double)");
+            Console.WriteLine("  7. Тариф за км (double)");
+            Console.WriteLine("  8. Код способу оплати з довідника (int)");
         }
 
         static void RunTabulation()
         {
-            Console.WriteLine("=== Розрахунок вартості абонемента залежно від годин на тиждень ===");
-            double from = ReadDouble("Введіть початкову кількість годин (0.5 - 20): ", 0.5, 20.0);
-            double to = ReadDouble($"Введіть кінцеву кількість годин ({from:F1} - 40): ", from, 40.0);
-            double step = ReadDouble("Введіть крок зміни годин (0.1 - 5): ", 0.1, 5.0);
+            Console.WriteLine("=== Табулювання вартості поїздки залежно від відстані ===");
+            double from = ReadDouble("Введіть початкову відстань у км (1 - 50): ", 1.0, 50.0);
+            double to = ReadDouble($"Введіть кінцеву відстань у км ({from:F1} - 150): ", from, 150.0);
+            double step = ReadDouble("Введіть крок зміни відстані у км (0.5 - 20): ", 0.5, 20.0);
 
             PrintTabulationTable(from, to, step);
         }
 
         static void PrintTabulationTable(double from, double to, double step)
         {
-            Console.WriteLine("\n(Базова ставка: 400 грн/год на тиждень, знижка 3% за кожну годину інтенсивності)");
-            Console.WriteLine($"{"Години/тиж",12} | {"Вартість, грн",15}");
-            Console.WriteLine(new string('-', 30));
+            Console.WriteLine("\n(Подача авто: 50 грн, базовий тариф: 18 грн/км)");
+            Console.WriteLine($"{"Відстань, км",14} | {"Вартість, грн",15}");
+            Console.WriteLine(new string('-', 32));
 
-            for (double hours = from; hours <= to + 1e-9; hours += step)
+            for (double km = from; km <= to + 1e-9; km += step)
             {
-                double cost = CalculateSubscriptionCost(hours);
-                Console.WriteLine($"{hours,12:F2} | {cost,15:F2}");
+                double cost = CalculateTariffCost(km);
+                Console.WriteLine($"{km,14:F2} | {cost,15:F2}");
             }
         }
 
-        static double CalculateSubscriptionCost(double hoursPerWeek)
+        static double CalculateTariffCost(double distanceKm)
         {
-            return hoursPerWeek * 400.0 * (1.0 - 0.03 * hoursPerWeek);
+            return 50.0 + distanceKm * 18.0;
         }
 
-        static void RunAttendanceTable()
+        static void RunDriversTable()
         {
-            Console.WriteLine("=== Звіт: кількість проведених тренувань по секціях і місяцях ===");
-            int rows = ReadInt("Введіть кількість секцій (рядків, від 1 до 15): ", 1, 15);
-            int cols = ReadInt("Введіть кількість місяців (стовпців, від 1 до 12): ", 1, 12);
+            Console.WriteLine("=== Звіт: кількість виконаних замовлень водіями по днях ===");
+            int rows = ReadInt("Введіть кількість водіїв (рядків, від 1 до 15): ", 1, 15);
+            int cols = ReadInt("Введіть кількість днів (стовпців, від 1 до 14): ", 1, 14);
 
-            PrintAttendanceTable(rows, cols);
+            PrintDriversTable(rows, cols);
         }
 
-        static void PrintAttendanceTable(int rows, int cols)
+        static void PrintDriversTable(int rows, int cols)
         {
             Console.WriteLine();
             int[] colTotals = new int[cols];
             int grandTotal = 0;
 
-            Console.Write($"{"Секція \\ Місяць",-16}");
+            Console.Write($"{"Водій \\ День",-16}");
             for (int col = 1; col <= cols; col++)
             {
-                Console.Write($"{$"Міс. {col}",9}");
+                Console.Write($"{$"День {col}",9}");
             }
             Console.WriteLine($"{"Разом",10}");
 
@@ -437,15 +459,15 @@ namespace SportsSection
 
             for (int row = 1; row <= rows; row++)
             {
-                Console.Write($"{"Секція #" + row,-16}");
+                Console.Write($"{"Водій #" + row,-16}");
                 int rowSum = 0;
 
                 for (int col = 1; col <= cols; col++)
                 {
-                    int trainings = 8 + (row * 2 + col) % 7;
-                    rowSum += trainings;
-                    colTotals[col - 1] += trainings;
-                    Console.Write($"{trainings,9}");
+                    int orders = 6 + (row * 3 + col) % 8;
+                    rowSum += orders;
+                    colTotals[col - 1] += orders;
+                    Console.Write($"{orders,9}");
                 }
 
                 Console.WriteLine($"{rowSum,10}");
@@ -461,19 +483,19 @@ namespace SportsSection
             Console.WriteLine($"{grandTotal,10}");
         }
 
-        static void RunAgeCalculation()
+        static void RunSingleTripCostCalculation()
         {
-            Console.WriteLine("=== Розрахунок віку вихованця ===");
-            int currentYear = DateTime.Now.Year;
-            int birthYear = ReadInt($"Введіть рік народження (1950 - {currentYear}): ", 1950, currentYear);
+            Console.WriteLine("=== Розрахунок вартості поїздки ===");
+            double distance = ReadDouble("Введіть відстань у км (0.5 - 500): ", 0.5, 500.0);
+            double rate = ReadDouble("Введіть тариф за км, грн (5 - 200): ", 5.0, 200.0);
 
-            int age = CalculateTraineeAge(birthYear, currentYear);
-            Console.WriteLine($"Вік вихованця: {age} р.");
+            double cost = CalculateSingleTripCost(distance, rate);
+            Console.WriteLine($"Вартість поїздки: {cost:F2} грн.");
         }
 
-        static int CalculateTraineeAge(int birthYear, int currentYear)
+        static double CalculateSingleTripCost(double distance, double ratePerKm)
         {
-            return currentYear - birthYear;
+            return distance * ratePerKm;
         }
 
         static void AddValue(double[] values, ref int count, double newValue, int capacity)
@@ -497,12 +519,12 @@ namespace SportsSection
                 return;
             }
 
-            Console.WriteLine($"{"№",4} | {"Тривалість, год",16}");
-            Console.WriteLine(new string('-', 23));
+            Console.WriteLine($"{"№",4} | {"Відстань, км",14}");
+            Console.WriteLine(new string('-', 21));
 
             for (int i = 0; i < count; i++)
             {
-                Console.WriteLine($"{i + 1,4} | {values[i],16:F2}");
+                Console.WriteLine($"{i + 1,4} | {values[i],14:F2}");
             }
         }
 
