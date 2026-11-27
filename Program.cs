@@ -35,21 +35,17 @@ namespace TaxiService
                 switch (choice)
                 {
                     case "1":
-                        ShowAllTrips(
-                            ids, drivers, tripDates, pickupAddresses, destinationAddresses,
-                            distances, ratesPerKm, paymentMethodIds, tripsCount);
+                        ShowAllTrips(ids, drivers, tripDates, pickupAddresses, destinationAddresses, distances, ratesPerKm, paymentMethodIds, tripsCount);
                         Pause();
                         break;
-
                     case "2":
-                        AddTrip(
-                            ids, drivers, tripDates, pickupAddresses, destinationAddresses,
-                            distances, ratesPerKm, paymentMethodIds,
-                            ref tripsCount, ref nextTripId, Capacity);
+                        AddTrip(ids, drivers, tripDates, pickupAddresses, destinationAddresses, distances, ratesPerKm, paymentMethodIds, ref tripsCount, ref nextTripId, Capacity);
                         Pause();
                         break;
-
                     case "3":
+                        SearchTrips(ids, drivers, tripDates, pickupAddresses, destinationAddresses, distances, ratesPerKm, paymentMethodIds, tripsCount);
+                        Pause();
+                        break;
                     case "4":
                     case "5":
                     case "6":
@@ -60,27 +56,22 @@ namespace TaxiService
                         ShowNotImplemented();
                         Pause();
                         break;
-
                     case "11":
                         ShowAbout();
                         Pause();
                         break;
-
                     case "12":
                         RunTabulation();
                         Pause();
                         break;
-
                     case "13":
                         RunDriversTable();
                         Pause();
                         break;
-
                     case "14":
                         RunSingleTripCostCalculation();
                         Pause();
                         break;
-
                     case "15":
                         Console.WriteLine("=== Додавання відстані поїздки ===");
                         double dist = ReadDouble("Введіть відстань поїздки (0.5 - 500 км): ", 0.5, 500.0);
@@ -88,13 +79,11 @@ namespace TaxiService
                         Console.WriteLine($"Поточна кількість записів у Main: {sampleDistancesCount}");
                         Pause();
                         break;
-
                     case "16":
                         Console.WriteLine("=== Список зафіксованих відстаней ===");
                         PrintValues(sampleDistances, sampleDistancesCount);
                         Pause();
                         break;
-
                     case "17":
                         Console.WriteLine("=== Статистика відстаней ===");
                         if (sampleDistancesCount == 0)
@@ -105,7 +94,6 @@ namespace TaxiService
                         {
                             FindMax(sampleDistances, sampleDistancesCount, out double maxVal, out int maxIdx);
                             CalculateStatistics(sampleDistances, sampleDistancesCount, out double sum, out double avg);
-
                             Console.WriteLine($"Кількість записів:    {sampleDistancesCount}");
                             Console.WriteLine($"Загальний пробіг:     {sum:F2} км");
                             Console.WriteLine($"Середня відстань:     {avg:F2} км");
@@ -113,21 +101,18 @@ namespace TaxiService
                         }
                         Pause();
                         break;
-
                     case "18":
                         Console.WriteLine("=== Дослід: значимий тип (int) та посилальний тип (масив) ===");
                         int orders = 5;
                         Console.WriteLine($"1. Значимий тип (int): до виклику методу orders = {orders}");
                         TryModifyInt(orders);
                         Console.WriteLine($"   Після виклику TryModifyInt(orders): orders = {orders} (не змінилося, передалась копія)");
-
                         double[] sample = { 3.5, 7.0, 12.2 };
                         Console.WriteLine($"\n2. Посилальний тип (double[]): до виклику методу sample[0] = {sample[0]:F1}");
                         ModifyArrayElement(sample);
                         Console.WriteLine($"   Після виклику ModifyArrayElement(sample): sample[0] = {sample[0]:F1} (змінилося, передалась адреса)");
                         Pause();
                         break;
-
                     case "19":
                         Console.WriteLine("=== Видалення запису за номером ===");
                         PrintValues(sampleDistances, sampleDistancesCount);
@@ -135,20 +120,14 @@ namespace TaxiService
                         RemoveAt(sampleDistances, ref sampleDistancesCount, recordNumber - 1);
                         Pause();
                         break;
-
                     case "20":
-                        SeedTestData(
-                            ids, drivers, tripDates, pickupAddresses, destinationAddresses,
-                            distances, ratesPerKm, paymentMethodIds,
-                            ref tripsCount, ref nextTripId, Capacity);
+                        SeedTestData(ids, drivers, tripDates, pickupAddresses, destinationAddresses, distances, ratesPerKm, paymentMethodIds, ref tripsCount, ref nextTripId, Capacity);
                         Pause();
                         break;
-
                     case "0":
                         running = false;
                         Console.WriteLine("Завершення роботи. До побачення!");
                         break;
-
                     default:
                         Console.WriteLine("Немає такого пункту. Спробуйте ще раз.");
                         Pause();
@@ -199,10 +178,102 @@ namespace TaxiService
             Console.WriteLine("Цей пункт меню буде реалізовано в наступних роботах.");
         }
 
-        static void ShowAllTrips(
-            int[] ids, string[] drivers, DateTime[] tripDates, string[] pickupAddresses,
-            string[] destinationAddresses, double[] distances, double[] ratesPerKm,
-            int[] paymentMethodIds, int count)
+        static int FindIndexById(int[] ids, int count, int id)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                if (ids[i] == id)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        static void PrintTripTableHeader()
+        {
+            Console.WriteLine($"{"№",4} {"Водій",-18} {"Дата й час",-17} {"Звідки",-18} {"Куди",-18} {"Км",7} {"Тариф",8} {"Опл.",5}");
+            Console.WriteLine(new string('-', 102));
+        }
+
+        static void PrintTripRow(int id, string driver, DateTime tripDate, string pickup, string destination, double distance, double rate, int paymentId)
+        {
+            Console.WriteLine($"{id,4} {driver,-18} {tripDate,-17:dd.MM.yyyy HH:mm} {pickup,-18} {destination,-18} {distance,7:F1} {rate,8:F2} {paymentId,5}");
+        }
+
+        static void SearchTrips(int[] ids, string[] drivers, DateTime[] tripDates, string[] pickupAddresses, string[] destinationAddresses, double[] distances, double[] ratesPerKm, int[] paymentMethodIds, int count)
+        {
+            Console.WriteLine("=== Пошук поїздок за умовою ===");
+            if (count == 0)
+            {
+                Console.WriteLine("Сховище порожнє. Немає записів для пошуку.");
+                return;
+            }
+
+            Console.WriteLine("1 — за частиною тексту (водій або адреса)");
+            Console.WriteLine("2 — за діапазоном відстані (км)");
+            int mode = ReadInt("Оберіть спосіб пошуку (1 - 2): ", 1, 2);
+            Console.WriteLine();
+
+            int foundCount = 0;
+
+            if (mode == 1)
+            {
+                string query = ReadText("Введіть частину ПІБ водія або адреси: ");
+                Console.WriteLine();
+
+                for (int i = 0; i < count; i++)
+                {
+                    if (drivers[i].Contains(query) || pickupAddresses[i].Contains(query) || destinationAddresses[i].Contains(query))
+                    {
+                        if (foundCount == 0)
+                        {
+                            PrintTripTableHeader();
+                        }
+                        PrintTripRow(ids[i], drivers[i], tripDates[i], pickupAddresses[i], destinationAddresses[i], distances[i], ratesPerKm[i], paymentMethodIds[i]);
+                        foundCount++;
+                    }
+                }
+            }
+            else
+            {
+                double from = ReadDouble("Мінімальна відстань у км (0 - 500): ", 0.0, 500.0);
+                double to = ReadDouble("Максимальна відстань у км (0 - 500): ", 0.0, 500.0);
+
+                if (from > to)
+                {
+                    Console.WriteLine("Помилка: нижня межа не може бути більшою за верхню.");
+                    return;
+                }
+
+                Console.WriteLine();
+
+                for (int i = 0; i < count; i++)
+                {
+                    if (distances[i] >= from && distances[i] <= to)
+                    {
+                        if (foundCount == 0)
+                        {
+                            PrintTripTableHeader();
+                        }
+                        PrintTripRow(ids[i], drivers[i], tripDates[i], pickupAddresses[i], destinationAddresses[i], distances[i], ratesPerKm[i], paymentMethodIds[i]);
+                        foundCount++;
+                    }
+                }
+            }
+
+            if (foundCount == 0)
+            {
+                Console.WriteLine("За вашим запитом нічого не знайдено.");
+            }
+            else
+            {
+                Console.WriteLine(new string('-', 102));
+                Console.WriteLine($"Знайдено записів: {foundCount}.");
+            }
+        }
+
+        static void ShowAllTrips(int[] ids, string[] drivers, DateTime[] tripDates, string[] pickupAddresses, string[] destinationAddresses, double[] distances, double[] ratesPerKm, int[] paymentMethodIds, int count)
         {
             Console.WriteLine("=== Список поїздок служби таксі ===");
             if (count == 0)
@@ -211,14 +282,11 @@ namespace TaxiService
                 return;
             }
 
-            Console.WriteLine(
-                $"{"№",4} {"Водій",-18} {"Дата й час",-17} {"Звідки",-18} {"Куди",-18} {"Км",7} {"Тариф",8} {"Опл.",5}");
-            Console.WriteLine(new string('-', 102));
+            PrintTripTableHeader();
 
             for (int i = 0; i < count; i++)
             {
-                Console.WriteLine(
-                    $"{ids[i],4} {drivers[i],-18} {tripDates[i],-17:dd.MM.yyyy HH:mm} {pickupAddresses[i],-18} {destinationAddresses[i],-18} {distances[i],7:F1} {ratesPerKm[i],8:F2} {paymentMethodIds[i],5}");
+                PrintTripRow(ids[i], drivers[i], tripDates[i], pickupAddresses[i], destinationAddresses[i], distances[i], ratesPerKm[i], paymentMethodIds[i]);
             }
 
             double totalRevenue = CalculateTotalRevenue(distances, ratesPerKm, count);
@@ -248,10 +316,7 @@ namespace TaxiService
             return total;
         }
 
-        static void AddTrip(
-            int[] ids, string[] drivers, DateTime[] tripDates, string[] pickupAddresses,
-            string[] destinationAddresses, double[] distances, double[] ratesPerKm,
-            int[] paymentMethodIds, ref int count, ref int nextId, int capacity)
+        static void AddTrip(int[] ids, string[] drivers, DateTime[] tripDates, string[] pickupAddresses, string[] destinationAddresses, double[] distances, double[] ratesPerKm, int[] paymentMethodIds, ref int count, ref int nextId, int capacity)
         {
             Console.WriteLine("=== Додавання нової поїздки ===");
             if (count >= capacity)
@@ -283,21 +348,10 @@ namespace TaxiService
             Console.WriteLine($"\nДодано поїздку №{ids[count - 1]} (водій: {driver}).");
         }
 
-        static void SeedTestData(
-            int[] ids, string[] drivers, DateTime[] tripDates, string[] pickupAddresses,
-            string[] destinationAddresses, double[] distances, double[] ratesPerKm,
-            int[] paymentMethodIds, ref int count, ref int nextId, int capacity)
+        static void SeedTestData(int[] ids, string[] drivers, DateTime[] tripDates, string[] pickupAddresses, string[] destinationAddresses, double[] distances, double[] ratesPerKm, int[] paymentMethodIds, ref int count, ref int nextId, int capacity)
         {
             Console.WriteLine("=== Заповнення тестовими даними ===");
-            string[] sampleDrivers =
-            {
-                "Ковач Василь",
-                "Мельник Андрій",
-                "Бондар Олег",
-                "Ткачук Ігор",
-                "Савченко Тарас",
-                "Гнатюк Роман"
-            };
+            string[] sampleDrivers = { "Ковач Василь", "Мельник Андрій", "Бондар Олег", "Ткачук Ігор", "Савченко Тарас", "Гнатюк Роман" };
             DateTime[] sampleDates =
             {
                 new DateTime(2026, 11, 20, 8, 30, 0),
@@ -307,24 +361,8 @@ namespace TaxiService
                 new DateTime(2026, 11, 23, 21, 05, 0),
                 new DateTime(2026, 11, 24, 9, 20, 0)
             };
-            string[] samplePickups =
-            {
-                "пл. Петефі, 14",
-                "вул. Собранецька, 89",
-                "Залізничний вокзал",
-                "пр. Свободи, 22",
-                "вул. Корзо, 5",
-                "вул. Минайська, 16"
-            };
-            string[] sampleDestinations =
-            {
-                "Боздоський парк",
-                "вул. Капушанська, 40",
-                "пл. Корятовича, 2",
-                "вул. Заньковецької, 11",
-                "Аеропорт Ужгород",
-                "вул. Грушевського, 33"
-            };
+            string[] samplePickups = { "пл. Петефі, 14", "вул. Собранецька, 89", "Залізничний вокзал", "пр. Свободи, 22", "вул. Корзо, 5", "вул. Минайська, 16" };
+            string[] sampleDestinations = { "Боздоський парк", "вул. Капушанська, 40", "пл. Корятовича, 2", "вул. Заньковецької, 11", "Аеропорт Ужгород", "вул. Грушевського, 33" };
             double[] sampleDist = { 4.2, 6.5, 3.8, 5.1, 7.4, 2.9 };
             double[] sampleRates = { 18.0, 18.0, 20.0, 18.0, 22.0, 18.0 };
             int[] samplePayments = { 2, 1, 3, 2, 3, 1 };
@@ -361,12 +399,10 @@ namespace TaxiService
             {
                 Console.Write(prompt);
                 string input = Console.ReadLine();
-
                 if (!string.IsNullOrWhiteSpace(input))
                 {
                     return input.Trim();
                 }
-
                 Console.WriteLine("Помилка: рядок не може бути порожнім.");
             }
         }
@@ -377,13 +413,11 @@ namespace TaxiService
             {
                 Console.Write(prompt);
                 string input = Console.ReadLine()?.Trim();
-
                 if (DateTime.TryParseExact(input, "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateTime)
                     && dateTime >= minDate && dateTime <= maxDate)
                 {
                     return dateTime;
                 }
-
                 Console.WriteLine($"Помилка: введіть коректні дату й час у форматі дд.мм.рррр гг:хх від {minDate:dd.MM.yyyy HH:mm} до {maxDate:dd.MM.yyyy HH:mm}.");
             }
         }
@@ -410,7 +444,6 @@ namespace TaxiService
             double from = ReadDouble("Введіть початкову відстань у км (1 - 50): ", 1.0, 50.0);
             double to = ReadDouble($"Введіть кінцеву відстань у км ({from:F1} - 150): ", from, 150.0);
             double step = ReadDouble("Введіть крок зміни відстані у км (0.5 - 20): ", 0.5, 20.0);
-
             PrintTabulationTable(from, to, step);
         }
 
@@ -419,7 +452,6 @@ namespace TaxiService
             Console.WriteLine("\n(Подача авто: 50 грн, базовий тариф: 18 грн/км)");
             Console.WriteLine($"{"Відстань, км",14} | {"Вартість, грн",15}");
             Console.WriteLine(new string('-', 32));
-
             for (double km = from; km <= to + 1e-9; km += step)
             {
                 double cost = CalculateTariffCost(km);
@@ -437,7 +469,6 @@ namespace TaxiService
             Console.WriteLine("=== Звіт: кількість виконаних замовлень водіями по днях ===");
             int rows = ReadInt("Введіть кількість водіїв (рядків, від 1 до 15): ", 1, 15);
             int cols = ReadInt("Введіть кількість днів (стовпців, від 1 до 14): ", 1, 14);
-
             PrintDriversTable(rows, cols);
         }
 
@@ -461,7 +492,6 @@ namespace TaxiService
             {
                 Console.Write($"{"Водій #" + row,-16}");
                 int rowSum = 0;
-
                 for (int col = 1; col <= cols; col++)
                 {
                     int orders = 6 + (row * 3 + col) % 8;
@@ -469,7 +499,6 @@ namespace TaxiService
                     colTotals[col - 1] += orders;
                     Console.Write($"{orders,9}");
                 }
-
                 Console.WriteLine($"{rowSum,10}");
             }
 
@@ -488,7 +517,6 @@ namespace TaxiService
             Console.WriteLine("=== Розрахунок вартості поїздки ===");
             double distance = ReadDouble("Введіть відстань у км (0.5 - 500): ", 0.5, 500.0);
             double rate = ReadDouble("Введіть тариф за км, грн (5 - 200): ", 5.0, 200.0);
-
             double cost = CalculateSingleTripCost(distance, rate);
             Console.WriteLine($"Вартість поїздки: {cost:F2} грн.");
         }
@@ -505,7 +533,6 @@ namespace TaxiService
                 Console.WriteLine("Помилка: масив заповнений, місця більше немає.");
                 return;
             }
-
             values[count] = newValue;
             count++;
             Console.WriteLine("Значення успішно додано.");
@@ -518,10 +545,8 @@ namespace TaxiService
                 Console.WriteLine("Масив порожній. Немає даних для відображення.");
                 return;
             }
-
             Console.WriteLine($"{"№",4} | {"Відстань, км",14}");
             Console.WriteLine(new string('-', 21));
-
             for (int i = 0; i < count; i++)
             {
                 Console.WriteLine($"{i + 1,4} | {values[i],14:F2}");
@@ -536,10 +561,8 @@ namespace TaxiService
                 maxIndex = -1;
                 return;
             }
-
             maxValue = values[0];
             maxIndex = 0;
-
             for (int i = 1; i < count; i++)
             {
                 if (values[i] > maxValue)
@@ -557,7 +580,6 @@ namespace TaxiService
             {
                 sum += values[i];
             }
-
             average = count > 0 ? sum / count : 0;
         }
 
@@ -568,12 +590,10 @@ namespace TaxiService
                 Console.WriteLine("Помилка: некоректний номер запису. Видалення не виконано.");
                 return;
             }
-
             for (int i = index; i < count - 1; i++)
             {
                 values[i] = values[i + 1];
             }
-
             values[count - 1] = 0;
             count--;
             Console.WriteLine($"Запис №{index + 1} видалено.");
@@ -598,12 +618,10 @@ namespace TaxiService
             {
                 Console.Write(prompt);
                 string input = Console.ReadLine();
-
                 if (int.TryParse(input, out int result) && result >= min && result <= max)
                 {
                     return result;
                 }
-
                 Console.WriteLine($"Помилка: введіть ціле число від {min} до {max}.");
             }
         }
@@ -614,13 +632,10 @@ namespace TaxiService
             {
                 Console.Write(prompt);
                 string input = Console.ReadLine()?.Replace(',', '.');
-
-                if (double.TryParse(input, NumberStyles.Any, CultureInfo.InvariantCulture, out double result)
-                    && result >= min && result <= max)
+                if (double.TryParse(input, NumberStyles.Any, CultureInfo.InvariantCulture, out double result) && result >= min && result <= max)
                 {
                     return result;
                 }
-
                 Console.WriteLine($"Помилка: введіть дійсне число від {min} до {max}.");
             }
         }
