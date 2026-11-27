@@ -42,19 +42,31 @@ namespace TaxiService
                 switch (choice)
                 {
                     case "1":
-                        ShowAllTrips(ids, drivers, tripDates, pickupAddresses, destinationAddresses, distances, ratesPerKm, paymentMethodIds, tripsCount);
+                        ShowAllTrips(
+                            ids, drivers, tripDates, pickupAddresses, destinationAddresses,
+                            distances, ratesPerKm, paymentMethodIds, tripsCount,
+                            paymentIds, paymentNames, paymentCount);
                         Pause();
                         break;
                     case "2":
-                        AddTrip(ids, drivers, tripDates, pickupAddresses, destinationAddresses, distances, ratesPerKm, paymentMethodIds, ref tripsCount, ref nextTripId, Capacity);
+                        AddTrip(
+                            ids, drivers, tripDates, pickupAddresses, destinationAddresses,
+                            distances, ratesPerKm, paymentMethodIds, ref tripsCount, ref nextTripId, Capacity,
+                            paymentIds, paymentNames, paymentActive, paymentCount);
                         Pause();
                         break;
                     case "3":
-                        SearchTrips(ids, drivers, tripDates, pickupAddresses, destinationAddresses, distances, ratesPerKm, paymentMethodIds, tripsCount);
+                        SearchTrips(
+                            ids, drivers, tripDates, pickupAddresses, destinationAddresses,
+                            distances, ratesPerKm, paymentMethodIds, tripsCount,
+                            paymentIds, paymentNames, paymentCount);
                         Pause();
                         break;
                     case "4":
-                        EditTrip(ids, drivers, tripDates, pickupAddresses, destinationAddresses, distances, ratesPerKm, paymentMethodIds, tripsCount);
+                        EditTrip(
+                            ids, drivers, tripDates, pickupAddresses, destinationAddresses,
+                            distances, ratesPerKm, paymentMethodIds, tripsCount,
+                            paymentIds, paymentNames, paymentActive, paymentCount);
                         Pause();
                         break;
                     case "5":
@@ -226,6 +238,46 @@ namespace TaxiService
             return "(невідомий)";
         }
 
+        static bool HasActivePaymentMethods(bool[] paymentActive, int paymentCount)
+        {
+            for (int i = 0; i < paymentCount; i++)
+            {
+                if (paymentActive[i])
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        static void PrintActivePaymentMethods(int[] paymentIds, string[] paymentNames, bool[] paymentActive, int paymentCount)
+        {
+            Console.WriteLine("Доступні способи оплати:");
+            for (int i = 0; i < paymentCount; i++)
+            {
+                if (paymentActive[i])
+                {
+                    Console.WriteLine($"  {paymentIds[i]} — {paymentNames[i]}");
+                }
+            }
+        }
+
+        static int ReadActivePaymentMethodId(int[] paymentIds, bool[] paymentActive, int paymentCount)
+        {
+            while (true)
+            {
+                int selectedId = ReadInt("Оберіть код способу оплати: ", 1, int.MaxValue);
+                int index = FindPaymentIndexById(paymentIds, paymentCount, selectedId);
+
+                if (index != -1 && paymentActive[index])
+                {
+                    return selectedId;
+                }
+
+                Console.WriteLine("Помилка: вказаний спосіб оплати не існує або вимкнений.");
+            }
+        }
+
         static void ManagePaymentMethods(
             int[] paymentIds, string[] paymentNames, bool[] paymentActive,
             ref int paymentCount, ref int nextPaymentId, int capacity)
@@ -361,16 +413,20 @@ namespace TaxiService
 
         static void PrintTripTableHeader()
         {
-            Console.WriteLine($"{"№",4} {"Водій",-18} {"Дата й час",-17} {"Звідки",-18} {"Куди",-18} {"Км",7} {"Тариф",8} {"Опл.",5}");
-            Console.WriteLine(new string('-', 102));
+            Console.WriteLine($"{"№",4} {"Водій",-18} {"Дата й час",-17} {"Звідки",-18} {"Куди",-18} {"Км",7} {"Тариф",8} {"Спосіб оплати",-22}");
+            Console.WriteLine(new string('-', 119));
         }
 
-        static void PrintTripRow(int id, string driver, DateTime tripDate, string pickup, string destination, double distance, double rate, int paymentId)
+        static void PrintTripRow(int id, string driver, DateTime tripDate, string pickup, string destination, double distance, double rate, string paymentName)
         {
-            Console.WriteLine($"{id,4} {driver,-18} {tripDate,-17:dd.MM.yyyy HH:mm} {pickup,-18} {destination,-18} {distance,7:F1} {rate,8:F2} {paymentId,5}");
+            Console.WriteLine($"{id,4} {driver,-18} {tripDate,-17:dd.MM.yyyy HH:mm} {pickup,-18} {destination,-18} {distance,7:F1} {rate,8:F2} {paymentName,-22}");
         }
 
-        static void SearchTrips(int[] ids, string[] drivers, DateTime[] tripDates, string[] pickupAddresses, string[] destinationAddresses, double[] distances, double[] ratesPerKm, int[] paymentMethodIds, int count)
+        static void SearchTrips(
+            int[] ids, string[] drivers, DateTime[] tripDates, string[] pickupAddresses,
+            string[] destinationAddresses, double[] distances, double[] ratesPerKm,
+            int[] paymentMethodIds, int count,
+            int[] paymentIds, string[] paymentNames, int paymentCount)
         {
             Console.WriteLine("=== Пошук поїздок за умовою ===");
             if (count == 0)
@@ -399,7 +455,8 @@ namespace TaxiService
                         {
                             PrintTripTableHeader();
                         }
-                        PrintTripRow(ids[i], drivers[i], tripDates[i], pickupAddresses[i], destinationAddresses[i], distances[i], ratesPerKm[i], paymentMethodIds[i]);
+                        string payName = GetPaymentMethodName(paymentIds, paymentNames, paymentCount, paymentMethodIds[i]);
+                        PrintTripRow(ids[i], drivers[i], tripDates[i], pickupAddresses[i], destinationAddresses[i], distances[i], ratesPerKm[i], payName);
                         foundCount++;
                     }
                 }
@@ -425,7 +482,8 @@ namespace TaxiService
                         {
                             PrintTripTableHeader();
                         }
-                        PrintTripRow(ids[i], drivers[i], tripDates[i], pickupAddresses[i], destinationAddresses[i], distances[i], ratesPerKm[i], paymentMethodIds[i]);
+                        string payName = GetPaymentMethodName(paymentIds, paymentNames, paymentCount, paymentMethodIds[i]);
+                        PrintTripRow(ids[i], drivers[i], tripDates[i], pickupAddresses[i], destinationAddresses[i], distances[i], ratesPerKm[i], payName);
                         foundCount++;
                     }
                 }
@@ -437,12 +495,16 @@ namespace TaxiService
             }
             else
             {
-                Console.WriteLine(new string('-', 102));
+                Console.WriteLine(new string('-', 119));
                 Console.WriteLine($"Знайдено записів: {foundCount}.");
             }
         }
 
-        static void EditTrip(int[] ids, string[] drivers, DateTime[] tripDates, string[] pickupAddresses, string[] destinationAddresses, double[] distances, double[] ratesPerKm, int[] paymentMethodIds, int count)
+        static void EditTrip(
+            int[] ids, string[] drivers, DateTime[] tripDates, string[] pickupAddresses,
+            string[] destinationAddresses, double[] distances, double[] ratesPerKm,
+            int[] paymentMethodIds, int count,
+            int[] paymentIds, string[] paymentNames, bool[] paymentActive, int paymentCount)
         {
             Console.WriteLine("=== Зміна даних поїздки ===");
             if (count == 0)
@@ -462,7 +524,8 @@ namespace TaxiService
 
             Console.WriteLine("\nПоточні дані:");
             PrintTripTableHeader();
-            PrintTripRow(ids[index], drivers[index], tripDates[index], pickupAddresses[index], destinationAddresses[index], distances[index], ratesPerKm[index], paymentMethodIds[index]);
+            string currentPayName = GetPaymentMethodName(paymentIds, paymentNames, paymentCount, paymentMethodIds[index]);
+            PrintTripRow(ids[index], drivers[index], tripDates[index], pickupAddresses[index], destinationAddresses[index], distances[index], ratesPerKm[index], currentPayName);
 
             Console.WriteLine("\nВведіть нові значення (порожній Enter залишає поле без змін):");
 
@@ -544,22 +607,31 @@ namespace TaxiService
                 Console.WriteLine("Помилка: введіть число від 5 до 200 або натисніть Enter.");
             }
 
-            while (true)
+            if (HasActivePaymentMethods(paymentActive, paymentCount))
             {
-                Console.Write($"Код способу оплати (1-3) [{paymentMethodIds[index]}]: ");
-                string payInput = Console.ReadLine();
-                if (string.IsNullOrWhiteSpace(payInput))
+                PrintActivePaymentMethods(paymentIds, paymentNames, paymentActive, paymentCount);
+                while (true)
                 {
-                    break;
-                }
+                    string updatedName = GetPaymentMethodName(paymentIds, paymentNames, paymentCount, paymentMethodIds[index]);
+                    Console.Write($"Код способу оплати [{paymentMethodIds[index]} — {updatedName}]: ");
+                    string payInput = Console.ReadLine();
+                    if (string.IsNullOrWhiteSpace(payInput))
+                    {
+                        break;
+                    }
 
-                if (int.TryParse(payInput.Trim(), out int newPay) && newPay >= 1 && newPay <= 3)
-                {
-                    paymentMethodIds[index] = newPay;
-                    break;
-                }
+                    if (int.TryParse(payInput.Trim(), out int newPay))
+                    {
+                        int payIdx = FindPaymentIndexById(paymentIds, paymentCount, newPay);
+                        if (payIdx != -1 && paymentActive[payIdx])
+                        {
+                            paymentMethodIds[index] = newPay;
+                            break;
+                        }
+                    }
 
-                Console.WriteLine("Помилка: введіть ціле число від 1 до 3 або натисніть Enter.");
+                    Console.WriteLine("Помилка: вказаний спосіб оплати не існує або вимкнений.");
+                }
             }
 
             Console.WriteLine($"\nПоїздку №{id} успішно оновлено.");
@@ -675,7 +747,11 @@ namespace TaxiService
             averageDistance = totalDistance / count;
         }
 
-        static void ShowAllTrips(int[] ids, string[] drivers, DateTime[] tripDates, string[] pickupAddresses, string[] destinationAddresses, double[] distances, double[] ratesPerKm, int[] paymentMethodIds, int count)
+        static void ShowAllTrips(
+            int[] ids, string[] drivers, DateTime[] tripDates, string[] pickupAddresses,
+            string[] destinationAddresses, double[] distances, double[] ratesPerKm,
+            int[] paymentMethodIds, int count,
+            int[] paymentIds, string[] paymentNames, int paymentCount)
         {
             Console.WriteLine("=== Список поїздок служби таксі ===");
             if (count == 0)
@@ -688,13 +764,14 @@ namespace TaxiService
 
             for (int i = 0; i < count; i++)
             {
-                PrintTripRow(ids[i], drivers[i], tripDates[i], pickupAddresses[i], destinationAddresses[i], distances[i], ratesPerKm[i], paymentMethodIds[i]);
+                string payName = GetPaymentMethodName(paymentIds, paymentNames, paymentCount, paymentMethodIds[i]);
+                PrintTripRow(ids[i], drivers[i], tripDates[i], pickupAddresses[i], destinationAddresses[i], distances[i], ratesPerKm[i], payName);
             }
 
             double totalRevenue = CalculateTotalRevenue(distances, ratesPerKm, count);
             double totalDistance = CalculateTotalDistance(distances, count);
 
-            Console.WriteLine(new string('-', 102));
+            Console.WriteLine(new string('-', 119));
             Console.WriteLine($"Записів: {count}. Загальний пробіг: {totalDistance:F1} км. Загальна вартість поїздок: {totalRevenue:F2} грн.");
         }
 
@@ -718,12 +795,22 @@ namespace TaxiService
             return total;
         }
 
-        static void AddTrip(int[] ids, string[] drivers, DateTime[] tripDates, string[] pickupAddresses, string[] destinationAddresses, double[] distances, double[] ratesPerKm, int[] paymentMethodIds, ref int count, ref int nextId, int capacity)
+        static void AddTrip(
+            int[] ids, string[] drivers, DateTime[] tripDates, string[] pickupAddresses,
+            string[] destinationAddresses, double[] distances, double[] ratesPerKm,
+            int[] paymentMethodIds, ref int count, ref int nextId, int capacity,
+            int[] paymentIds, string[] paymentNames, bool[] paymentActive, int paymentCount)
         {
             Console.WriteLine("=== Додавання нової поїздки ===");
             if (count >= capacity)
             {
                 Console.WriteLine("Сховище заповнене (максимум 100 записів), видаліть щось зайве.");
+                return;
+            }
+
+            if (!HasActivePaymentMethods(paymentActive, paymentCount))
+            {
+                Console.WriteLine("У довіднику немає жодного активного способу оплати. Спочатку додайте його в пункті 10.");
                 return;
             }
 
@@ -733,7 +820,9 @@ namespace TaxiService
             string destination = ReadText("Адреса призначення: ");
             double distance = ReadDouble("Відстань у км (0.5 - 500): ", 0.5, 500.0);
             double rate = ReadDouble("Тариф за км, грн (5 - 200): ", 5.0, 200.0);
-            int paymentId = ReadInt("Код способу оплати (1 - Готівка, 2 - Картка, 3 - Apple/Google Pay): ", 1, 3);
+
+            PrintActivePaymentMethods(paymentIds, paymentNames, paymentActive, paymentCount);
+            int paymentId = ReadActivePaymentMethodId(paymentIds, paymentActive, paymentCount);
 
             ids[count] = nextId;
             drivers[count] = driver;
