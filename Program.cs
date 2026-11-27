@@ -130,6 +130,10 @@ namespace TaxiService
                         SeedTestData(ids, drivers, tripDates, pickupAddresses, destinationAddresses, distances, ratesPerKm, paymentMethodIds, ref tripsCount, ref nextTripId, Capacity);
                         Pause();
                         break;
+                    case "21":
+                        ShowTripsSummary(ids, distances, ratesPerKm, tripsCount);
+                        Pause();
+                        break;
                     case "0":
                         running = false;
                         Console.WriteLine("Завершення роботи. До побачення!");
@@ -168,6 +172,7 @@ namespace TaxiService
             Console.WriteLine("19 — видалити запис за номером (Лаб 9)");
             Console.WriteLine("-----------------------------------------");
             Console.WriteLine("20 — заповнити тестовими поїздками (Лаб 10)");
+            Console.WriteLine("21 — підсумки поїздок (Лаб 11)");
             Console.WriteLine("0  — вихід");
             Console.Write("Ваш вибір: ");
         }
@@ -441,6 +446,75 @@ namespace TaxiService
 
             count--;
             Console.WriteLine($"Поїздку №{id} видалено. Лишилося записів: {count}.");
+        }
+
+        static void ShowTripsSummary(int[] ids, double[] distances, double[] ratesPerKm, int count)
+        {
+            Console.WriteLine("=== Підсумки по поїздках ===");
+            if (count == 0)
+            {
+                Console.WriteLine("Сховище порожнє. Немає даних для розрахунку підсумків.");
+                return;
+            }
+
+            CalculateTripsSummary(
+                ids, distances, ratesPerKm, count,
+                out double totalRevenue,
+                out double minDistance, out int minId,
+                out double maxDistance, out int maxId,
+                out double averageDistance);
+
+            Console.WriteLine($"Кількість поїздок:             {count}");
+            Console.WriteLine($"Загальна вартість поїздок:     {totalRevenue:F2} грн");
+            Console.WriteLine($"Найкоротша поїздка:            {minDistance:F1} км (№{minId})");
+            Console.WriteLine($"Найдовша поїздка:              {maxDistance:F1} км (№{maxId})");
+            Console.WriteLine($"Середня відстань поїздки:      {averageDistance:F2} км");
+        }
+
+        static void CalculateTripsSummary(
+            int[] ids, double[] distances, double[] ratesPerKm, int count,
+            out double totalRevenue,
+            out double minDistance, out int minId,
+            out double maxDistance, out int maxId,
+            out double averageDistance)
+        {
+            if (count <= 0)
+            {
+                totalRevenue = 0;
+                minDistance = 0;
+                minId = -1;
+                maxDistance = 0;
+                maxId = -1;
+                averageDistance = 0;
+                return;
+            }
+
+            totalRevenue = distances[0] * ratesPerKm[0];
+            double totalDistance = distances[0];
+            minDistance = distances[0];
+            minId = ids[0];
+            maxDistance = distances[0];
+            maxId = ids[0];
+
+            for (int i = 1; i < count; i++)
+            {
+                totalRevenue += distances[i] * ratesPerKm[i];
+                totalDistance += distances[i];
+
+                if (distances[i] < minDistance)
+                {
+                    minDistance = distances[i];
+                    minId = ids[i];
+                }
+
+                if (distances[i] > maxDistance)
+                {
+                    maxDistance = distances[i];
+                    maxId = ids[i];
+                }
+            }
+
+            averageDistance = totalDistance / count;
         }
 
         static void ShowAllTrips(int[] ids, string[] drivers, DateTime[] tripDates, string[] pickupAddresses, string[] destinationAddresses, double[] distances, double[] ratesPerKm, int[] paymentMethodIds, int count)
